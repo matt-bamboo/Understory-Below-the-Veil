@@ -2,6 +2,10 @@
 
 Timestamp: 7/3 9:27AM PT
 
+Superseded setup note: Xcode finished installing after this bootstrap report.
+See `Reports/2026-07-03-final-readiness-audit.md` for the final verified local
+tooling state.
+
 ## Status
 
 Unity project bootstrap is complete and verified for starting Scene 01 work.
@@ -19,7 +23,9 @@ Unity project bootstrap is complete and verified for starting Scene 01 work.
 - Unity iOS Build Support installed:
   `/Applications/Unity/Hub/Editor/6000.5.2f1/PlaybackEngines/iOSSupport`
 - Apple Command Line Tools installed: `/Library/Developer/CommandLineTools`
-- Xcode is still downloading/installing as `/Applications/Xcode.appdownload`.
+- Xcode was still incomplete during this bootstrap pass. Final readiness later
+  verified Xcode `26.6`, license acceptance, first-launch setup, iOS SDK
+  `26.5`, iOS Simulator SDK `26.5`, and iOS Simulator runtime `26.5`.
 
 ## Unity Project Created
 
@@ -55,5 +61,6 @@ Verifier confirmed:
 
 ## Remaining Gate
 
-iOS device builds are still blocked until full Xcode finishes installing and is
-opened once. Scene 01 implementation can begin now in the Unity editor.
+Cleared after this bootstrap pass. Scene 01 implementation can begin now in the
+Unity editor. iOS device signing/provisioning remains future Apple
+developer-account work.

@@ -46,7 +46,7 @@ Breathlines, or the mountain breathing.
 
 ## Setup State
 
-As of `7/3 9:27AM PT`:
+As of `7/3 10:47AM PT`:
 
 - GitHub remote exists: `https://github.com/matt-bamboo/Understory-Below-the-Veil`
 - `main` is pushed and tracking `origin/main`
@@ -58,8 +58,13 @@ As of `7/3 9:27AM PT`:
 - Scene 01 starter scene exists at
   `UnityProject/Understory_Unity_Proof/Assets/Understory/Scenes/Scene01_SummitHatch_BoreRoom.unity`
 - Unity batch verification passes
-- Xcode is still downloading/installing as `/Applications/Xcode.appdownload`
+- Xcode `26.6` is installed at `/Applications/Xcode.app`
+- Xcode license check passes
+- Xcode first-launch setup passes
+- Xcode iOS SDK and iOS Simulator SDK `26.5` are installed
+- iOS Simulator runtime `26.5` is installed
+- iPhone and iPad simulator devices are available
 - Apple Command Line Tools are installed
 
-Gameplay implementation can begin in Unity. iOS device builds remain blocked
-until full Xcode finishes installing and is opened once.
+Gameplay implementation can begin in Unity. iOS device signing/provisioning is
+future Apple developer-account work; the local install/setup gate is cleared.
