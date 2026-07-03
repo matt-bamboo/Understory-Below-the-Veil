@@ -46,14 +46,20 @@ Breathlines, or the mountain breathing.
 
 ## Setup State
 
-As of `7/3 9:07AM PT`:
+As of `7/3 9:27AM PT`:
 
 - GitHub remote exists: `https://github.com/matt-bamboo/Understory-Below-the-Veil`
-- the repo started empty with no default branch pushed
+- `main` is pushed and tracking `origin/main`
 - Unity Hub is installed locally
-- Unity Editor was not found under `/Applications`
-- Xcode was not found under `/Applications`
+- Unity Editor `6000.5.2f1` is installed
+- Unity iOS Build Support is installed
+- Unity project exists at `UnityProject/Understory_Unity_Proof`
+- URP `17.5.0` is active for the project
+- Scene 01 starter scene exists at
+  `UnityProject/Understory_Unity_Proof/Assets/Understory/Scenes/Scene01_SummitHatch_BoreRoom.unity`
+- Unity batch verification passes
+- Xcode is still downloading/installing as `/Applications/Xcode.appdownload`
 - Apple Command Line Tools are installed
 
-Unity project creation is therefore blocked until Unity 6 with URP/iOS Build
-Support and full Xcode are installed.
+Gameplay implementation can begin in Unity. iOS device builds remain blocked
+until full Xcode finishes installing and is opened once.

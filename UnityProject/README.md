@@ -1,13 +1,20 @@
 # UnityProject
 
-Unity project files belong here once Unity 6 is installed.
+Unity project files live here.
 
-Expected setup:
+Current project:
 
-- Unity 6
-- Universal Render Pipeline
-- iOS Build Support
-- project name: `Understory_Unity_Proof`
+- `Understory_Unity_Proof`
+- Unity `6000.5.2f1`
+- Universal Render Pipeline `17.5.0`
+- iOS Build Support installed
+- starter scene:
+  `Assets/Understory/Scenes/Scene01_SummitHatch_BoreRoom.unity`
 
-Do not start production systems before a clean empty scene can run in the Unity
-editor.
+Run the verifier from repo root with:
+
+```sh
+"/Applications/Unity/Hub/Editor/6000.5.2f1/Unity.app/Contents/MacOS/Unity" -batchmode -quit -projectPath "$(pwd)/UnityProject/Understory_Unity_Proof" -executeMethod Understory.Editor.UnderstoryProjectVerifier.VerifyReady -logFile "$(pwd)/Reports/unity-verify-ready.log"
+```
+
+Do not start production systems beyond Scene 01 until the visual proof lands.
