@@ -50,6 +50,20 @@ namespace Understory.Editor
                     failures.Add($"Missing real-material procedural texture `{texturePath}`.");
             }
 
+            foreach (var assetPath in new[]
+            {
+                "Assets/ThirdParty/KayKit/MedievalBuilder/License.txt",
+                "Assets/ThirdParty/KayKit/MedievalBuilder/Objects/house.fbx",
+                "Assets/ThirdParty/KayKit/MedievalBuilder/Objects/mine.fbx",
+                "Assets/ThirdParty/KayKit/MedievalBuilder/Objects/farm_plot.fbx",
+                "Assets/ThirdParty/KayKit/MedievalBuilder/Tiles/square_forest_detail.fbx",
+                "Assets/ThirdParty/KayKit/MedievalBuilder/Tiles/square_rock_detail.fbx"
+            })
+            {
+                if (AssetDatabase.LoadAssetAtPath<Object>(assetPath) == null)
+                    failures.Add($"Missing imported CC0 KayKit scene asset `{assetPath}`.");
+            }
+
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
                 failures.Add("Missing Scene01 starter scene.");
 
@@ -88,6 +102,23 @@ namespace Understory.Editor
                 "Scene01_CinematicColorVolume",
                 "Surface_BroadEditableZone_C_D_F",
                 "SummitRefuge_RealMaterialMiniature",
+                "KayKitHero_SurfaceRefuge_MaterialMiniature",
+                "KayKit_SummitRefuge_House",
+                "KayKit_HiddenHatch_MineMouth",
+                "KayKit_HatchMineralCrust_Hero",
+                "KayKit_FirstGarden_FarmPlot",
+                "KayKit_Windbreak_WallStraight",
+                "KayKit_Terrace_WallCorner",
+                "KayKitHero_CrewVisibleMiniatures",
+                "KayKitHero_StewardFigure",
+                "KayKit_ReturnTable_Hero",
+                "KayKit_FirstKiln_Hero",
+                "KayKit_SurfaceBuildPad_Hero",
+                "KayKit_PlayerSupportBlock_Hero",
+                "KayKit_CoreSample_WellLikeShafthead",
+                "KayKit_ArchiveShelf_Hero",
+                "KayKit_RepairedShelterPatch_Hero",
+                "KayKit_ViableGarden_Repaired_Hero",
                 "RefugeRoof_LeftPlane",
                 "RefugeWaterCatch_Glass",
                 "Surface_TactileMaterialScatter",
@@ -102,6 +133,12 @@ namespace Understory.Editor
                 "WorkerPlaceholder_ShallowCut_A",
                 "02_BoreRoom_Blockout",
                 "BoreRoom_RealMaterialDressings",
+                "KayKitHero_BoreRoom_AncientWorks",
+                "KayKit_BoreMaterialFace_MineAsset",
+                "KayKit_BoreShoring_RoofedTimber",
+                "KayKit_BoreShoring_Committed_Hero",
+                "KayKit_BoreTraceSeam_Hero",
+                "KayKit_BoreCollapseBurial_Hero",
                 "BoreFloor_AncientPaver_00",
                 "BoreLanternString_WarmPoint_00",
                 "A_ProtectedShell_MainBoreShaft",

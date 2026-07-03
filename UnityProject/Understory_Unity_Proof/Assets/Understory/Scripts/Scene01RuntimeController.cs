@@ -210,6 +210,7 @@ namespace Understory
                     MoveStewardTo("Scene01Node_BoreInspection");
                     SetActive("D_PlayerBuilt_BoreShoring_Committed", true);
                     SetActive("D_PlayerBuiltGhostDraft_BoreShoring", false);
+                    SetActive("KayKit_BoreShoring_Committed_Hero", true);
                     SetStage(Scene01Stage.ShoringPlaced, "First shoring is set before the material face is touched.");
                     return true;
 
@@ -228,6 +229,7 @@ namespace Understory
                     instability = Mathf.Max(0f, instability - 0.2f);
                     SetActive("CollapseBurial_BoreDebris", false);
                     SetActive("BlastImpact_Dust", false);
+                    SetActive("KayKit_BoreCollapseBurial_Hero", false);
                     eventLog.Add("Crew clears the blast burial. The haul path is open again.");
                     PulseFeedback();
                     return true;
@@ -257,6 +259,7 @@ namespace Understory
                         return false;
                     coreSampleBandAdded = true;
                     SetActive("CoreSampleBand_FirstDescent", true);
+                    SetActive("KayKit_CoreSampleBand_FirstDescent_Hero", true);
                     eventLog.Add("Core Sample gains its first band from the Bore Room seam.");
                     MoveStewardTo("Scene01Node_CoreSample");
                     PulseFeedback();
@@ -267,6 +270,7 @@ namespace Understory
                         return false;
                     archiveSeedPlaced = true;
                     SetActive("ArchiveSingular_FirstSeam", true);
+                    SetActive("KayKit_ArchiveSingular_FirstSeam_Hero", true);
                     eventLog.Add(traceGestureComplete
                         ? "Archive shelf receives the first intact seam fragment."
                         : "Archive shelf receives a scarred bulk fragment from the blast.");
@@ -304,7 +308,7 @@ namespace Understory
         private void CacheSceneReferences()
         {
             sceneRoot = FindTransformByName("Scene01_VisualProofPass1") ?? transform;
-            steward = FindTransformByName("StewardPlaceholder_SummitSteward");
+            steward = FindTransformByName("KayKitHero_StewardFigure") ?? FindTransformByName("StewardPlaceholder_SummitSteward");
             mainCamera = Camera.main ?? FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault(camera => camera.enabled);
             interactablesById.Clear();
             foreach (var interactable in (sceneRoot != null ? sceneRoot : transform).GetComponentsInChildren<Scene01Interactable>(true))
@@ -361,9 +365,9 @@ namespace Understory
             SetLocalScale("C_DestroyableRuin_HatchMineralCrust", new Vector3(1.9f, 0.16f, 1.9f));
             SetActive("B_HatchState_TransitionGlow", false);
             SetActive("D_PlayerBuilt_BoreShoring_Committed", false);
-            SetActive("D_PlayerBuiltGhostDraft_BoreShoring", true);
-            SetActive("E_ExtractionVolume_BoreMaterialCache", true);
-            SetActive("C_DestroyableRuin_EditableBoreDebris_A", true);
+            SetActive("D_PlayerBuiltGhostDraft_BoreShoring", false);
+            SetActive("E_ExtractionVolume_BoreMaterialCache", false);
+            SetActive("C_DestroyableRuin_EditableBoreDebris_A", false);
             SetActive("TraceSeam_Glow", false);
             SetActive("BlastImpact_Dust", false);
             SetActive("CollapseBurial_BoreDebris", false);
@@ -379,6 +383,25 @@ namespace Understory
             SetActive("CoreSampleBand_FirstDescent", false);
             SetActive("ArchiveSingular_FirstSeam", false);
             SetActive("WantList_EastWallDraft", false);
+            SetActive("KayKit_HatchMineralCrust_Hero", true);
+            SetLocalScale("KayKit_HatchMineralCrust_Hero", new Vector3(0.54f, 0.055f, 0.54f));
+            SetActive("KayKit_HatchGlow_Hero", false);
+            SetActive("KayKit_BoreShoring_Committed_Hero", false);
+            SetActive("KayKit_BoreTraceSeam_Hero", false);
+            SetActive("KayKit_BoreCollapseBurial_Hero", false);
+            SetActive("KayKit_Haul_RoughStone_Hero", false);
+            SetActive("KayKit_Haul_Clay_Hero", false);
+            SetActive("KayKit_BuildMaterial_DressedStone_Hero", false);
+            SetActive("KayKit_BuildMaterial_Seedclay_Hero", false);
+            SetActive("KayKit_BuildMaterial_FiredBrick_Hero", false);
+            SetActive("KayKit_RepairedShelterPatch_Hero", false);
+            SetActive("KayKit_RepairedTerracePatch_Hero", false);
+            SetActive("KayKit_ViableGarden_Repaired_Hero", false);
+            SetActiveHeroSprouts(false);
+            SetActive("KayKit_PlayerSupportBlock_Hero", false);
+            SetActive("KayKit_DraftWantList_Hero", false);
+            SetActive("KayKit_CoreSampleBand_FirstDescent_Hero", false);
+            SetActive("KayKit_ArchiveSingular_FirstSeam_Hero", false);
 
             SetMaterial("D_PlayerBuiltGhostDraft_ShelterPatch", "ghost_draft");
             SetMaterial("D_PlayerBuiltGhostDraft_TerraceStone", "ghost_draft");
@@ -401,6 +424,7 @@ namespace Understory
             traceProgress = 0f;
             MoveStewardTo("Scene01Node_BoreInspection");
             SetActive("TraceSeam_Glow", true);
+            SetActive("KayKit_BoreTraceSeam_Hero", true);
             eventLog.Add("Trace the lit seam with the field tool. Slow drag beats force.");
             PulseFeedback();
             return true;
@@ -417,6 +441,7 @@ namespace Understory
             traceProgress = 1f;
             instability = Mathf.Max(0f, instability - 0.1f);
             SetActive("TraceSeam_Glow", false);
+            SetActive("KayKit_BoreTraceSeam_Hero", false);
             PulseFeedback();
             return ExtractMaterial("Trace", instant);
         }
@@ -431,6 +456,7 @@ namespace Understory
             instability = 0.75f;
             SetActive("BlastImpact_Dust", true);
             SetActive("CollapseBurial_BoreDebris", true);
+            SetActive("KayKit_BoreCollapseBurial_Hero", true);
             PulseFeedback();
             var extracted = ExtractMaterial("Blast", false);
             if (extracted)
@@ -449,7 +475,8 @@ namespace Understory
             inventory["rawClay"] += mode == "Trace" ? 3 : 2;
             SetStage(Scene01Stage.MaterialExtracted, $"{mode} extraction frees stone and clay without damaging the protected Bore.");
             SetActive("E_ExtractionVolume_BoreMaterialCache", false);
-            SetActive("C_DestroyableRuin_EditableBoreDebris_A", mode == "Trace");
+            SetActive("C_DestroyableRuin_EditableBoreDebris_A", false);
+            SetActive("KayKit_BoreTraceSeam_Hero", false);
             return true;
         }
 
@@ -487,6 +514,8 @@ namespace Understory
             isHaulAnimating = false;
             SetActive("MaterialHaul_RoughStone", true);
             SetActive("MaterialHaul_Clay", true);
+            SetActive("KayKit_Haul_RoughStone_Hero", true);
+            SetActive("KayKit_Haul_Clay_Hero", true);
             SetStage(Scene01Stage.HaulReturned, "The Return Ritual brings the haul to the shafthead table.");
             AimCameraAt(SurfaceCameraName);
         }
@@ -515,6 +544,11 @@ namespace Understory
             SetActive("BuildMaterial_DressedStone", true);
             SetActive("BuildMaterial_Seedclay", true);
             SetActive("BuildMaterial_FiredBrick", true);
+            SetActive("KayKit_Haul_RoughStone_Hero", false);
+            SetActive("KayKit_Haul_Clay_Hero", false);
+            SetActive("KayKit_BuildMaterial_DressedStone_Hero", true);
+            SetActive("KayKit_BuildMaterial_Seedclay_Hero", true);
+            SetActive("KayKit_BuildMaterial_FiredBrick_Hero", true);
             SetStage(Scene01Stage.MaterialRefined, "Raw haul becomes buildable material. The Core Sample and Archive can record the first find.");
         }
 
@@ -532,6 +566,7 @@ namespace Understory
                     inventory["timberBrace"] -= 1;
                     shelterRepaired = true;
                     SetActive("D_PlayerBuilt_ShelterWindbreak_Repaired", true);
+                    SetActive("KayKit_RepairedShelterPatch_Hero", true);
                     SetMaterial("D_PlayerBuiltGhostDraft_ShelterPatch", "fired_brick");
                     eventLog.Add("Shelter windbreak repaired.");
                     break;
@@ -543,6 +578,7 @@ namespace Understory
                     terraceRepaired = true;
                     SetActive("D_PlayerBuilt_TerracePatch_Repaired", true);
                     SetActive("C_DestroyableRuin_TerraceGap_A", false);
+                    SetActive("KayKit_RepairedTerracePatch_Hero", true);
                     SetMaterial("D_PlayerBuiltGhostDraft_TerraceStone", "rough_stone");
                     eventLog.Add("Terrace edge stabilized.");
                     break;
@@ -553,6 +589,8 @@ namespace Understory
                     inventory["seedclay"] -= 1;
                     gardenRepaired = true;
                     SetActive("D_PlayerBuilt_ViableGarden_Repaired", true);
+                    SetActive("KayKit_ViableGarden_Repaired_Hero", true);
+                    SetActiveHeroSprouts(true);
                     SetMaterial("D_PlayerBuiltGhostDraft_ViableSoilPreview", "seed_soil_viable");
                     eventLog.Add("Tiny soil bed becomes viable.");
                     break;
@@ -580,6 +618,8 @@ namespace Understory
             playerBlockPlaced = true;
             SetActive("D_PlayerBuilt_Block_01", true);
             SetActive("WantList_EastWallDraft", true);
+            SetActive("KayKit_PlayerSupportBlock_Hero", true);
+            SetActive("KayKit_DraftWantList_Hero", true);
             draftWantListVisible = true;
             MoveStewardTo("Scene01Node_BuildZone");
             eventLog.Add(blockRemovalProofSeen ? "Support block replaced. The larger draft still wants more material." : "First draft block committed. The want-list now gives the next dig a reason.");
@@ -592,6 +632,7 @@ namespace Understory
             blockRemovalProofSeen = true;
             inventory["roughStone"] += 1;
             SetActive("D_PlayerBuilt_Block_01", false);
+            SetActive("KayKit_PlayerSupportBlock_Hero", false);
             MoveStewardTo("Scene01Node_BuildZone");
             eventLog.Add("Support block removed cleanly; protected shells remain untouched.");
         }
@@ -603,7 +644,7 @@ namespace Understory
                 sceneComplete = true;
                 stage = Scene01Stage.SceneComplete;
                 ApplyStageVisuals();
-                eventLog.Add("Scene complete: down, up, return, build, and want all breathe.");
+                eventLog.Add("Scene complete: down, up, return, build, and want all hold together.");
             }
         }
 
@@ -624,10 +665,16 @@ namespace Understory
                 var crust = FindTransformByName("C_DestroyableRuin_HatchMineralCrust");
                 if (crust != null)
                     crust.localScale = new Vector3(1.35f, 0.12f, 1.35f);
+                SetLocalScale("KayKit_HatchMineralCrust_Hero", new Vector3(0.34f, 0.045f, 0.34f));
+                SetActive("KayKit_HatchGlow_Hero", true);
             }
 
             if (stage >= Scene01Stage.HatchOpened)
+            {
                 SetActive("C_DestroyableRuin_HatchMineralCrust", false);
+                SetActive("KayKit_HatchMineralCrust_Hero", false);
+                SetActive("KayKit_HatchGlow_Hero", true);
+            }
         }
 
         private void HandlePointerInput()
@@ -684,7 +731,10 @@ namespace Understory
 
                 hasTracePointer = true;
                 lastTracePointer = pointerPosition;
-                if (PointerHitsNamedObject(pointerPosition, "TraceSeam_Glow") || PointerHitsNamedObject(pointerPosition, "E_ExtractionVolume_BoreMaterialCache"))
+                if (PointerHitsNamedObject(pointerPosition, "TraceSeam_Glow")
+                    || PointerHitsNamedObject(pointerPosition, "KayKit_BoreTraceSeam_Hero")
+                    || PointerHitsNamedObject(pointerPosition, "E_ExtractionVolume_BoreMaterialCache")
+                    || PointerHitsNamedObject(pointerPosition, "KayKit_BoreMaterialFace_MineAsset"))
                     traceProgress += Time.deltaTime * 0.28f;
 
                 traceProgress = Mathf.Clamp01(traceProgress);
@@ -978,6 +1028,13 @@ namespace Understory
                 target.localScale = scale;
         }
 
+        private void SetActiveHeroSprouts(bool active)
+        {
+            var root = sceneRoot != null ? sceneRoot : transform;
+            foreach (var sprout in root.GetComponentsInChildren<Transform>(true).Where(child => child.name.StartsWith("KayKit_GardenSprout_Hero_", StringComparison.Ordinal)))
+                sprout.gameObject.SetActive(active);
+        }
+
         private void SetMaterial(string objectName, string materialName)
         {
             var target = FindTransformByName(objectName);
@@ -1017,7 +1074,7 @@ namespace Understory
         private string GetObjective()
         {
             if (sceneComplete)
-                return "The first loop breathes: descend, extract, return, refine, build, record, and want the next haul.";
+                return "The first loop holds: descend, extract, return, refine, build, record, and want the next haul.";
 
             return stage switch
             {

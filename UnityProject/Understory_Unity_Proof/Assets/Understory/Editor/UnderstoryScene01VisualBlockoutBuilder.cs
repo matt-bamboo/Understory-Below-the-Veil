@@ -16,10 +16,14 @@ namespace Understory.Editor
         private const string Root = "Assets/Understory";
         private const string ScenePath = Root + "/Scenes/Scene01_SummitHatch_BoreRoom.unity";
         private const string MaterialFolder = Root + "/Materials/Scene01_Blockout";
+        private const string ImportedMaterialFolder = MaterialFolder + "/Imported";
         private const string TextureFolder = MaterialFolder + "/ProceduralTextures";
+        private const string KayKitObjectFolder = "Assets/ThirdParty/KayKit/MedievalBuilder/Objects";
+        private const string KayKitTileFolder = "Assets/ThirdParty/KayKit/MedievalBuilder/Tiles";
 
         private static readonly Dictionary<string, Material> Materials = new();
         private static readonly Dictionary<string, Texture2D> MaterialTextures = new();
+        private static readonly Dictionary<string, Material> ImportedMaterialCache = new();
 
         private enum SurfacePattern
         {
@@ -43,6 +47,7 @@ namespace Understory.Editor
         {
             EnsureFolders();
             EnsureMaterials();
+            PrepareImportedHeroAssets();
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = "Scene01_SummitHatch_BoreRoom";
@@ -68,6 +73,7 @@ namespace Understory.Editor
         private static void EnsureFolders()
         {
             Directory.CreateDirectory(MaterialFolder);
+            Directory.CreateDirectory(ImportedMaterialFolder);
             Directory.CreateDirectory(TextureFolder);
             Directory.CreateDirectory(Root + "/Scripts");
             Directory.CreateDirectory(Root + "/Scenes");
@@ -78,8 +84,9 @@ namespace Understory.Editor
         {
             Materials.Clear();
             MaterialTextures.Clear();
+            ImportedMaterialCache.Clear();
 
-            CreateMaterial("summit_snow", new Color(0.7f, 0.73f, 0.67f), 0.92f, pattern: SurfacePattern.Snow);
+            CreateMaterial("summit_snow", new Color(0.48f, 0.48f, 0.42f), 0.92f, pattern: SurfacePattern.Snow);
             CreateMaterial("summit_stone", new Color(0.36f, 0.34f, 0.29f), 0.9f, pattern: SurfacePattern.Stone);
             CreateMaterial("rough_stone", new Color(0.34f, 0.32f, 0.28f), 0.9f, pattern: SurfacePattern.Stone);
             CreateMaterial("clay_cut", new Color(0.58f, 0.34f, 0.24f), 0.92f, pattern: SurfacePattern.Clay);
@@ -105,6 +112,21 @@ namespace Understory.Editor
             CreateMaterial("editable_zone", new Color(0.3f, 0.6f, 0.45f, 0.07f), 0.88f, transparent: true, pattern: SurfacePattern.Ghost);
             CreateMaterial("veil", new Color(0.55f, 0.72f, 0.74f, 0.28f), 0.95f, transparent: true, pattern: SurfacePattern.Veil);
             CreateMaterial("protected_zone", new Color(0.2f, 0.24f, 0.3f, 0.08f), 0.86f, transparent: true, pattern: SurfacePattern.Veil);
+        }
+
+        private static void PrepareImportedHeroAssets()
+        {
+            ImportAssetsInFolder(KayKitObjectFolder);
+            ImportAssetsInFolder(KayKitTileFolder);
+        }
+
+        private static void ImportAssetsInFolder(string projectFolder)
+        {
+            if (!Directory.Exists(projectFolder))
+                return;
+
+            foreach (var path in Directory.EnumerateFiles(projectFolder, "*.fbx", SearchOption.TopDirectoryOnly))
+                AssetDatabase.ImportAsset(path.Replace('\\', '/'), ImportAssetOptions.ForceSynchronousImport);
         }
 
         private static void CreateMaterial(string id, Color color, float roughness, float emission = 0f, bool transparent = false, float metallic = 0f, SurfacePattern pattern = SurfacePattern.Stone)
@@ -385,6 +407,15 @@ namespace Understory.Editor
                 if (path.EndsWith(".mat", StringComparison.Ordinal) || path.EndsWith(".meta", StringComparison.Ordinal))
                     NormalizeFileWhitespace(path);
             }
+
+            if (Directory.Exists(ImportedMaterialFolder))
+            {
+                foreach (var path in Directory.EnumerateFiles(ImportedMaterialFolder))
+                {
+                    if (path.EndsWith(".mat", StringComparison.Ordinal) || path.EndsWith(".meta", StringComparison.Ordinal))
+                        NormalizeFileWhitespace(path);
+                }
+            }
         }
 
         private static void NormalizeFileWhitespace(string path)
@@ -415,21 +446,24 @@ namespace Understory.Editor
             var light = sun.AddComponent<Light>();
             light.type = LightType.Directional;
             light.color = new Color(1f, 0.78f, 0.48f);
-            light.intensity = 3.15f;
+            light.intensity = 2.75f;
             light.shadows = LightShadows.Soft;
-            light.shadowStrength = 0.74f;
+            light.shadowStrength = 0.78f;
 
-            CreateLight("BoreRoom_LanternKey", root, new Vector3(0f, -7f, 17f), new Color(1f, 0.55f, 0.25f), 5.5f, 18f);
-            CreateLight("Surface_WorkLanterns", root, new Vector3(-7f, 3.2f, -1f), new Color(1f, 0.63f, 0.28f), 2.7f, 13f);
-            CreateLight("GoldenRim_FromVeil", root, new Vector3(14f, 5.6f, -14f), new Color(1f, 0.47f, 0.2f), 1.6f, 28f);
+            CreateLight("BoreRoom_LanternKey", root, new Vector3(0f, -7f, 17f), new Color(1f, 0.55f, 0.25f), 6.2f, 18f);
+            CreateLight("Surface_WorkLanterns", root, new Vector3(-7.2f, 3.7f, -2.2f), new Color(1f, 0.63f, 0.28f), 2.35f, 13f);
+            CreateLight("GoldenRim_FromVeil", root, new Vector3(14f, 5.6f, -14f), new Color(1f, 0.47f, 0.2f), 1.4f, 28f);
+            CreateLight("Surface_GlassKick", root, new Vector3(-2.2f, 4.1f, 3.9f), new Color(0.55f, 0.78f, 1f), 1.15f, 10f);
 
             var camera = new GameObject("Main Camera");
             camera.tag = "MainCamera";
             camera.transform.SetParent(root);
-            camera.transform.position = new Vector3(13.8f, 8.2f, -15.4f);
-            LookAt(camera.transform, new Vector3(-3.6f, 1.05f, 0.3f));
+            camera.transform.position = new Vector3(-13.2f, 5.7f, -8.6f);
+            LookAt(camera.transform, new Vector3(-6.2f, 0.9f, -0.28f));
             var cam = camera.AddComponent<Camera>();
             cam.fieldOfView = 34f;
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0.29f, 0.28f, 0.25f);
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 500f;
             cam.allowHDR = true;
@@ -438,11 +472,11 @@ namespace Understory.Editor
 
             var boreCamera = new GameObject("CaptureCamera_BoreRoomReveal");
             boreCamera.transform.SetParent(root);
-            boreCamera.transform.position = new Vector3(7.8f, -6.4f, 31.2f);
-            LookAt(boreCamera.transform, new Vector3(-1.6f, -10.1f, 18.8f));
+            boreCamera.transform.position = new Vector3(7.1f, -5.5f, 31.6f);
+            LookAt(boreCamera.transform, new Vector3(-2.4f, -9.1f, 19.8f));
             var boreCam = boreCamera.AddComponent<Camera>();
             boreCam.enabled = false;
-            boreCam.fieldOfView = 34f;
+            boreCam.fieldOfView = 30f;
             boreCam.allowHDR = true;
             boreCam.clearFlags = CameraClearFlags.SolidColor;
             boreCam.backgroundColor = new Color(0.04f, 0.036f, 0.032f);
@@ -450,11 +484,13 @@ namespace Understory.Editor
 
             var surfaceCamera = new GameObject("CaptureCamera_SurfaceRepairCluster");
             surfaceCamera.transform.SetParent(root);
-            surfaceCamera.transform.position = new Vector3(-9.4f, 5.7f, -8.8f);
-            LookAt(surfaceCamera.transform, new Vector3(-4.9f, 1.25f, -0.2f));
+            surfaceCamera.transform.position = new Vector3(-13.2f, 5.7f, -8.6f);
+            LookAt(surfaceCamera.transform, new Vector3(-6.2f, 0.9f, -0.28f));
             var surfaceCam = surfaceCamera.AddComponent<Camera>();
             surfaceCam.enabled = false;
-            surfaceCam.fieldOfView = 31f;
+            surfaceCam.fieldOfView = 34f;
+            surfaceCam.clearFlags = CameraClearFlags.SolidColor;
+            surfaceCam.backgroundColor = new Color(0.29f, 0.28f, 0.25f);
             surfaceCam.allowHDR = true;
             EnablePostProcessing(surfaceCam);
 
@@ -487,10 +523,10 @@ namespace Understory.Editor
             bloom.scatter.Override(0.56f);
 
             var color = profile.Add<ColorAdjustments>(true);
-            color.postExposure.Override(0.08f);
-            color.contrast.Override(18f);
-            color.saturation.Override(-8f);
-            color.colorFilter.Override(new Color(1f, 0.93f, 0.84f));
+            color.postExposure.Override(-0.18f);
+            color.contrast.Override(12f);
+            color.saturation.Override(-10f);
+            color.colorFilter.Override(new Color(1f, 0.94f, 0.86f));
 
             var vignette = profile.Add<Vignette>(true);
             vignette.intensity.Override(0.18f);
@@ -517,8 +553,10 @@ namespace Understory.Editor
 
             CreatePrimitive(PrimitiveType.Cylinder, "A_ProtectedShell_MountainSummitMass", surface, new Vector3(0f, -1.75f, 0f), Vector3.Scale(new Vector3(28f, 0.85f, 22f), Vector3.one), Materials["summit_stone"], UnderstoryEditabilityClass.ProtectedShell, "Authored mountain shell. Not editable.", true);
             CreatePrimitive(PrimitiveType.Cylinder, "A_ProtectedShell_SummitSnowCap", surface, new Vector3(0f, 0.12f, 0f), new Vector3(21f, 0.42f, 16f), Materials["summit_snow"], UnderstoryEditabilityClass.ProtectedShell, "Authored summit cap and silhouette.", true);
-            CreatePrimitive(PrimitiveType.Cube, "Veil_Atmosphere_BelowSummit", surface, new Vector3(0f, -8.2f, 12f), new Vector3(48f, 3.5f, 18f), Materials["veil"], UnderstoryEditabilityClass.StoryGuide, "Visible Veil below the workyard. Progression wall only in this pass.", true);
-            CreatePrimitive(PrimitiveType.Cube, "Surface_BroadEditableZone_C_D_F", surface, new Vector3(-2f, 0.38f, -2f), new Vector3(18f, 0.08f, 11f), Materials["editable_zone"], UnderstoryEditabilityClass.StoryGuide, "Broad editable/buildable zone overlay for ruined and repairable surface pieces.", true);
+            var veil = CreatePrimitive(PrimitiveType.Cube, "Veil_Atmosphere_BelowSummit", surface, new Vector3(0f, -8.2f, 12f), new Vector3(48f, 3.5f, 18f), Materials["veil"], UnderstoryEditabilityClass.StoryGuide, "Visible Veil below the workyard. Progression wall only in this pass.", true);
+            veil.SetActive(false);
+            var editableOverlay = CreatePrimitive(PrimitiveType.Cube, "Surface_BroadEditableZone_C_D_F", surface, new Vector3(-2f, 0.38f, -2f), new Vector3(18f, 0.08f, 11f), Materials["editable_zone"], UnderstoryEditabilityClass.StoryGuide, "Broad editable/buildable zone overlay for ruined and repairable surface pieces.", true);
+            editableOverlay.SetActive(false);
 
             BuildSummitRefugeMiniature(surface);
             BuildRepairCluster(surface);
@@ -527,6 +565,7 @@ namespace Understory.Editor
             BuildReturnAndRefineStubs(surface);
             BuildShaftheadProgress(surface);
             BuildSurfaceMaterialScatter(surface);
+            BuildKayKitSurfaceHero(surface);
 
             AddLabel(surface, "Label_SurfaceScope", "First playable: Summit Refuge + sealed Bore + Return Ritual + draft want-list", new Vector3(-2f, 5.2f, -10f), 0.42f);
         }
@@ -588,6 +627,8 @@ namespace Understory.Editor
             CreateShrub(refuge, "RefugeShrub_Left", new Vector3(-2.38f, 0.55f, -1.32f), 0.58f);
             CreateShrub(refuge, "RefugeShrub_Right", new Vector3(2.64f, 0.54f, -1.78f), 0.42f);
             CreateGrassTufts(refuge, "RefugeGrass", new Vector3(-0.2f, 0.42f, -2.28f), 12, 2.8f, 0.55f);
+
+            refuge.gameObject.SetActive(false);
         }
 
         private static void BuildRepairCluster(Transform surface)
@@ -619,6 +660,7 @@ namespace Understory.Editor
             }
 
             AddLabel(cluster, "Label_FirstRepairCluster", "First repair cluster: windbreak + terrace edge + tiny soil bed", new Vector3(-7.2f, 4.6f, -5.2f), 0.32f);
+            cluster.gameObject.SetActive(false);
         }
 
         private static void BuildShallowCutAndHatch(Transform surface)
@@ -646,6 +688,7 @@ namespace Understory.Editor
             }
 
             AddLabel(cut, "Label_HatchDiscovery", "Workers disturb the sealed Bore while gathering scarce material", new Vector3(5.1f, 3.7f, 2.4f), 0.3f);
+            cut.gameObject.SetActive(false);
         }
 
         private static void BuildCharacters(Transform surface)
@@ -673,6 +716,7 @@ namespace Understory.Editor
             CreatePrimitive(PrimitiveType.Cube, "WorkerTool_TimberBraceBundle", characters, new Vector3(6.6f, 0.85f, -4.1f), new Vector3(1.2f, 0.18f, 0.22f), Materials["timber_brace"], UnderstoryEditabilityClass.PlayerBuilt, "Readable worker prop: timber braces for shoring.", false);
 
             AddLabel(characters, "Label_VisibleSteward", "Visible Summit Steward + worker silhouettes", new Vector3(0f, 3.6f, -3.4f), 0.28f);
+            characters.gameObject.SetActive(false);
         }
 
         private static void BuildReturnAndRefineStubs(Transform surface)
@@ -693,6 +737,7 @@ namespace Understory.Editor
             var buildBlock = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_Block_01", loop, new Vector3(-1.1f, 0.8f, -3.7f), new Vector3(0.8f, 0.8f, 0.8f), Materials["rough_stone"], UnderstoryEditabilityClass.PlayerBuilt, "Player-built support block for free-build placement/removal proof.", true);
             buildBlock.SetActive(false);
             AddLabel(loop, "Label_ReturnRefineStub", "Return Ritual + kiln + first committed draft", new Vector3(3.2f, 2.8f, -7.6f), 0.24f);
+            loop.gameObject.SetActive(false);
         }
 
         private static void BuildShaftheadProgress(Transform surface)
@@ -716,6 +761,7 @@ namespace Understory.Editor
 
             CreatePrimitive(PrimitiveType.Cube, "FarGlass_BlockedByVeil", progress, new Vector3(11.7f, 1.45f, -8.1f), new Vector3(0.32f, 1.35f, 0.32f), Materials["line_ceramic"], UnderstoryEditabilityClass.ProtectedLandmark, "Far-Glass seed: visible, still blocked by the Veil in Phase 0.", true);
             AddLabel(progress, "Label_CoreArchive", "Core Sample + Archive shelf make progress physical", new Vector3(9.7f, 3.25f, -6.6f), 0.23f);
+            progress.gameObject.SetActive(false);
         }
 
         private static void BuildSurfaceMaterialScatter(Transform surface)
@@ -742,6 +788,163 @@ namespace Understory.Editor
                 var material = Hash01(seed, i, 17) > 0.58f ? Materials["clay_cut"] : Materials["rough_stone"];
                 CreateRotatedPrimitive(PrimitiveType.Cube, $"SurfaceLooseMaterial_Pebble_{i:00}", scatter, new Vector3(x, y, z), new Vector3(scale * 1.4f, scale * 0.65f, scale), Quaternion.Euler(0f, Hash01(seed, i, 19) * 180f, Hash01(seed, i, 23) * 9f), material, UnderstoryEditabilityClass.ExtractionVolume, "Loose gathered material read; small tactile scatter for scale.", false);
             }
+
+            scatter.gameObject.SetActive(false);
+        }
+
+        private static void BuildKayKitSurfaceHero(Transform surface)
+        {
+            var hero = CreateGroup("KayKitHero_SurfaceRefuge_MaterialMiniature", surface);
+            hero.localPosition = new Vector3(-5.8f, 0.64f, 0.2f);
+            AddMarker(hero.gameObject, UnderstoryEditabilityClass.StoryGuide, "Imported CC0 KayKit hero art layer for the Scene 01 real-material miniature pass.", true);
+
+            var tileRows = new[]
+            {
+                new[] { "square_rock_roadA_detail", "square_forest_roadA_detail", "square_forest_detail" },
+                new[] { "square_rock_detail", "square_forest_detail", "square_forest_roadC_detail" },
+                new[] { "square_rock_waterStraight", "square_forest_waterStraight", "square_rock_detail" }
+            };
+
+            for (var z = 0; z < tileRows.Length; z++)
+            {
+                for (var x = 0; x < tileRows[z].Length; x++)
+                {
+                    var id = tileRows[z][x];
+                    CreateImportedModel(
+                        $"{KayKitTileFolder}/{id}.fbx",
+                        $"KayKit_SurfaceTile_{id}_{x}_{z}",
+                        hero,
+                        new Vector3((x - 1) * 2.05f, -0.08f, (z - 1) * 2.05f),
+                        Vector3.one * 0.92f,
+                        Quaternion.Euler(0f, (x + z) % 2 == 0 ? 0f : 90f, 0f),
+                        UnderstoryEditabilityClass.PlayerBuilt,
+                        "KayKit terrain tile composing the surface hero workyard.",
+                        false);
+                }
+            }
+
+            CreateImportedModel($"{KayKitObjectFolder}/house.fbx", "KayKit_SummitRefuge_House", hero, new Vector3(-0.78f, 0.02f, 0.28f), Vector3.one * 2.38f, Quaternion.Euler(0f, 155f, 0f), UnderstoryEditabilityClass.RepairAnchor, "Hero summit refuge: imported CC0 medieval miniature house.", true);
+            CreateImportedModel($"{KayKitObjectFolder}/mine.fbx", "KayKit_HiddenHatch_MineMouth", hero, new Vector3(2.48f, 0.03f, -1.05f), Vector3.one * 1.62f, Quaternion.Euler(0f, -48f, 0f), UnderstoryEditabilityClass.ProtectedLandmark, "Imported mine mouth repurposed as hidden hatch discovery shelter.", true);
+            CreateImportedModel($"{KayKitObjectFolder}/well.fbx", "KayKit_CoreSample_WellLikeShafthead", hero, new Vector3(1.88f, 0.04f, 1.42f), Vector3.one * 1.08f, Quaternion.Euler(0f, 22f, 0f), UnderstoryEditabilityClass.ProtectedLandmark, "Small shafthead object reinforcing Core Sample / Archive physicality.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/farm_plot.fbx", "KayKit_FirstGarden_FarmPlot", hero, new Vector3(-2.82f, 0.04f, -1.48f), Vector3.one * 1.22f, Quaternion.Euler(0f, 15f, 0f), UnderstoryEditabilityClass.RepairAnchor, "Imported farm plot for tiny garden repair target.", true);
+            CreateImportedModel($"{KayKitObjectFolder}/bridge_roofed.fbx", "KayKit_ReturnPath_RoofedBridge", hero, new Vector3(-2.62f, 0.05f, 1.46f), Vector3.one * 1.02f, Quaternion.Euler(0f, 68f, 0f), UnderstoryEditabilityClass.PlayerBuilt, "Small roofed bridge / haul path material read.", false);
+
+            CreateImportedModel($"{KayKitObjectFolder}/detail_treeA.fbx", "KayKit_Tree_A", hero, new Vector3(-3.18f, 0.05f, 0.52f), Vector3.one * 1.05f, Quaternion.Euler(0f, 22f, 0f), UnderstoryEditabilityClass.PlayerBuilt, "Hardy summit tree set dressing.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/detail_treeB.fbx", "KayKit_Tree_B", hero, new Vector3(2.55f, 0.05f, -2.18f), Vector3.one * 0.98f, Quaternion.Euler(0f, -40f, 0f), UnderstoryEditabilityClass.PlayerBuilt, "Hardy summit tree set dressing.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/detail_treeC.fbx", "KayKit_Tree_C", hero, new Vector3(-0.25f, 0.05f, -2.28f), Vector3.one * 0.82f, Quaternion.Euler(0f, 70f, 0f), UnderstoryEditabilityClass.PlayerBuilt, "Hardy summit tree set dressing.", false);
+
+            CreateImportedModel($"{KayKitObjectFolder}/detail_rocks.fbx", "KayKit_Rocks_HatchScar", hero, new Vector3(2.25f, 0.05f, -0.08f), Vector3.one * 0.88f, Quaternion.Euler(0f, 33f, 0f), UnderstoryEditabilityClass.ExtractionVolume, "Imported rocks around the hidden hatch cut.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/detail_rocks_small.fbx", "KayKit_Rocks_ReturnTable", hero, new Vector3(-1.72f, 0.05f, -2.0f), Vector3.one * 0.82f, Quaternion.Euler(0f, -17f, 0f), UnderstoryEditabilityClass.ExtractionVolume, "Loose material rocks for return/refine read.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/wall_straight.fbx", "KayKit_Windbreak_WallStraight", hero, new Vector3(-3.45f, 0.06f, 2.02f), Vector3.one * 0.9f, Quaternion.Euler(0f, 18f, 0f), UnderstoryEditabilityClass.RepairAnchor, "Imported wall piece representing first shelter windbreak repair.", true);
+            CreateImportedModel($"{KayKitObjectFolder}/wall_corner.fbx", "KayKit_Terrace_WallCorner", hero, new Vector3(1.35f, 0.06f, 2.1f), Vector3.one * 0.86f, Quaternion.Euler(0f, 122f, 0f), UnderstoryEditabilityClass.RepairAnchor, "Imported corner wall piece representing terrace repair.", true);
+
+            CreatePrimitive(PrimitiveType.Cylinder, "KayKit_HatchMineralCrust_Hero", hero, new Vector3(2.36f, 0.24f, -1.0f), new Vector3(0.54f, 0.055f, 0.54f), Materials["filterstone"], UnderstoryEditabilityClass.DestroyableRuin, "Visible mineral crust over the imported hidden hatch mouth.", true);
+            CreatePrimitive(PrimitiveType.Cube, "KayKit_GlassWaterCatch_Hero", hero, new Vector3(0.72f, 0.62f, 1.78f), new Vector3(1.05f, 0.08f, 0.74f), Materials["glass_pane"], UnderstoryEditabilityClass.PlayerBuilt, "Small glass catchment integrated with imported hero art.", false);
+            CreatePrimitive(PrimitiveType.Sphere, "KayKit_WarmWindowLantern_Hero", hero, new Vector3(-1.34f, 1.88f, -0.34f), Vector3.one * 0.17f, Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Warm window lantern cue on imported refuge.", false);
+            CreatePrimitive(PrimitiveType.Sphere, "KayKit_HatchGlow_Hero", hero, new Vector3(2.28f, 0.36f, -1.06f), Vector3.one * 0.18f, Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Warm glow cue for the hidden hatch discovery.", false);
+
+            CreateHeroLoopProps(hero);
+            CreateHeroCrew(hero);
+            CreateHeroScatter(hero);
+        }
+
+        private static void CreateHeroLoopProps(Transform hero)
+        {
+            CreatePrimitive(PrimitiveType.Cube, "KayKit_ReturnTable_Hero", hero, new Vector3(0.35f, 0.45f, -2.9f), new Vector3(1.25f, 0.14f, 0.76f), Materials["timber_brace"], UnderstoryEditabilityClass.StoryGuide, "Visible Return Ritual haul table in the hero miniature.", true);
+            CreatePrimitive(PrimitiveType.Cube, "KayKit_ReturnTable_Legs_A", hero, new Vector3(-0.12f, 0.24f, -2.62f), new Vector3(0.12f, 0.42f, 0.12f), Materials["timber_brace"], UnderstoryEditabilityClass.StoryGuide, "Return table timber leg.", false);
+            CreatePrimitive(PrimitiveType.Cube, "KayKit_ReturnTable_Legs_B", hero, new Vector3(0.82f, 0.24f, -3.18f), new Vector3(0.12f, 0.42f, 0.12f), Materials["timber_brace"], UnderstoryEditabilityClass.StoryGuide, "Return table timber leg.", false);
+
+            var haulStone = CreatePrimitive(PrimitiveType.Sphere, "KayKit_Haul_RoughStone_Hero", hero, new Vector3(0.02f, 0.68f, -2.93f), Vector3.one * 0.2f, Materials["rough_stone"], UnderstoryEditabilityClass.StoryGuide, "Returned rough stone haul visible on the hero table.", false);
+            haulStone.SetActive(false);
+            var haulClay = CreatePrimitive(PrimitiveType.Sphere, "KayKit_Haul_Clay_Hero", hero, new Vector3(0.58f, 0.68f, -2.88f), Vector3.one * 0.18f, Materials["clay_cut"], UnderstoryEditabilityClass.StoryGuide, "Returned clay haul visible on the hero table.", false);
+            haulClay.SetActive(false);
+
+            CreatePrimitive(PrimitiveType.Cylinder, "KayKit_FirstKiln_Hero", hero, new Vector3(1.72f, 0.52f, -2.95f), new Vector3(0.45f, 0.44f, 0.45f), Materials["fired_brick"], UnderstoryEditabilityClass.StoryGuide, "Visible first kiln/refiner in the hero miniature.", true);
+            CreatePrimitive(PrimitiveType.Sphere, "KayKit_FirstKiln_Glow_Hero", hero, new Vector3(1.72f, 0.98f, -2.95f), Vector3.one * 0.18f, Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Warm kiln glow for the first refine step.", false);
+
+            var dressedStone = CreatePrimitive(PrimitiveType.Cube, "KayKit_BuildMaterial_DressedStone_Hero", hero, new Vector3(1.22f, 1.03f, -2.55f), new Vector3(0.34f, 0.18f, 0.26f), Materials["rough_stone"], UnderstoryEditabilityClass.StoryGuide, "Refined dressed stone visible after the kiln step.", false);
+            dressedStone.SetActive(false);
+            var seedClay = CreatePrimitive(PrimitiveType.Sphere, "KayKit_BuildMaterial_Seedclay_Hero", hero, new Vector3(1.7f, 1.08f, -2.48f), Vector3.one * 0.15f, Materials["seed_soil_viable"], UnderstoryEditabilityClass.StoryGuide, "Refined viable seedclay visible after the kiln step.", false);
+            seedClay.SetActive(false);
+            var firedBrick = CreatePrimitive(PrimitiveType.Cube, "KayKit_BuildMaterial_FiredBrick_Hero", hero, new Vector3(2.16f, 1.03f, -2.55f), new Vector3(0.34f, 0.18f, 0.26f), Materials["fired_brick"], UnderstoryEditabilityClass.StoryGuide, "Refined fired brick visible after the kiln step.", false);
+            firedBrick.SetActive(false);
+
+            var buildPad = CreatePrimitive(PrimitiveType.Cube, "KayKit_SurfaceBuildPad_Hero", hero, new Vector3(0.6f, 0.19f, 3.05f), new Vector3(1.32f, 0.05f, 0.94f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Visible free-build pad in the miniature workyard.", true);
+            buildPad.transform.localRotation = Quaternion.Euler(0f, -14f, 0f);
+            var support = CreatePrimitive(PrimitiveType.Cube, "KayKit_PlayerSupportBlock_Hero", hero, new Vector3(0.58f, 0.58f, 3.04f), new Vector3(0.52f, 0.52f, 0.52f), Materials["rough_stone"], UnderstoryEditabilityClass.PlayerBuilt, "Visible first placed support block in the hero miniature.", true);
+            support.SetActive(false);
+            var wantList = CreatePrimitive(PrimitiveType.Cube, "KayKit_DraftWantList_Hero", hero, new Vector3(1.32f, 0.62f, 3.28f), new Vector3(0.48f, 0.34f, 0.48f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Visible want-list ghost block that makes the next haul desirable.", true);
+            wantList.SetActive(false);
+
+            var shelterPatch = CreatePrimitive(PrimitiveType.Cube, "KayKit_RepairedShelterPatch_Hero", hero, new Vector3(-5.42f, 0.58f, 2.9f), new Vector3(0.82f, 0.62f, 0.22f), Materials["fired_brick"], UnderstoryEditabilityClass.PlayerBuilt, "Visible repaired shelter windbreak patch.", true);
+            shelterPatch.transform.localRotation = Quaternion.Euler(0f, 18f, 0f);
+            shelterPatch.SetActive(false);
+            var terracePatch = CreatePrimitive(PrimitiveType.Cube, "KayKit_RepairedTerracePatch_Hero", hero, new Vector3(2.18f, 0.32f, 3.2f), new Vector3(1.08f, 0.22f, 0.48f), Materials["rough_stone"], UnderstoryEditabilityClass.PlayerBuilt, "Visible repaired terrace edge patch.", true);
+            terracePatch.transform.localRotation = Quaternion.Euler(0f, 122f, 0f);
+            terracePatch.SetActive(false);
+            var gardenPatch = CreatePrimitive(PrimitiveType.Cube, "KayKit_ViableGarden_Repaired_Hero", hero, new Vector3(-4.02f, 0.18f, -2.24f), new Vector3(1.0f, 0.055f, 0.68f), Materials["seed_soil_viable"], UnderstoryEditabilityClass.PlayerBuilt, "Visible green garden repair overlay.", true);
+            gardenPatch.SetActive(false);
+
+            for (var i = 0; i < 5; i++)
+            {
+                var sprout = CreatePrimitive(PrimitiveType.Capsule, $"KayKit_GardenSprout_Hero_{i:00}", hero, new Vector3(-4.36f + i * 0.17f, 0.33f, -2.2f + (i % 2) * 0.16f), new Vector3(0.035f, 0.12f, 0.035f), Materials["seed_soil_viable"], UnderstoryEditabilityClass.PlayerBuilt, "Tiny visible sprout after garden repair.", false);
+                sprout.SetActive(false);
+            }
+
+            CreatePrimitive(PrimitiveType.Cube, "KayKit_ArchiveShelf_Hero", hero, new Vector3(3.45f, 0.52f, 1.25f), new Vector3(0.95f, 0.16f, 0.46f), Materials["timber_brace"], UnderstoryEditabilityClass.ProtectedLandmark, "Visible Archive shelf in the miniature.", true);
+            var archiveSeed = CreatePrimitive(PrimitiveType.Sphere, "KayKit_ArchiveSingular_FirstSeam_Hero", hero, new Vector3(3.45f, 0.78f, 1.25f), Vector3.one * 0.14f, Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Visible first Archive fragment.", true);
+            archiveSeed.SetActive(false);
+            var coreBand = CreatePrimitive(PrimitiveType.Cylinder, "KayKit_CoreSampleBand_FirstDescent_Hero", hero, new Vector3(1.88f, 0.74f, 1.42f), new Vector3(0.26f, 0.055f, 0.26f), Materials["clay_cut"], UnderstoryEditabilityClass.StoryGuide, "Visible first band added to the shafthead/Core Sample object.", true);
+            coreBand.SetActive(false);
+        }
+
+        private static void CreateHeroCrew(Transform hero)
+        {
+            var crew = CreateGroup("KayKitHero_CrewVisibleMiniatures", hero);
+            crew.localPosition = Vector3.zero;
+
+            CreateHeroFigure(crew, "KayKitHero_StewardFigure", new Vector3(2.45f, 0.52f, -1.15f), 0.56f, Materials["steward_cloth"], Materials["roof_tile"], true);
+            CreateHeroFigure(crew, "KayKitHero_WorkerFigure_A", new Vector3(3.18f, 0.46f, -2.1f), 0.44f, Materials["worker_cloth"], Materials["fired_brick"], false);
+            CreateHeroFigure(crew, "KayKitHero_WorkerFigure_B", new Vector3(-2.55f, 0.46f, -1.25f), 0.42f, Materials["worker_cloth"], Materials["roof_tile"], false);
+
+            CreateRotatedPrimitive(PrimitiveType.Cube, "KayKitHero_WorkerPick_Handle", crew, new Vector3(3.38f, 0.76f, -2.13f), new Vector3(0.035f, 0.42f, 0.035f), Quaternion.Euler(0f, 0f, -21f), Materials["timber_brace"], UnderstoryEditabilityClass.StoryGuide, "Miniature worker extraction tool handle.", false);
+            CreateRotatedPrimitive(PrimitiveType.Cube, "KayKitHero_WorkerPick_Head", crew, new Vector3(3.46f, 0.98f, -2.14f), new Vector3(0.22f, 0.045f, 0.055f), Quaternion.Euler(0f, 0f, -21f), Materials["worn_metal"], UnderstoryEditabilityClass.StoryGuide, "Miniature worker extraction tool head.", false);
+        }
+
+        private static void CreateHeroFigure(Transform parent, string name, Vector3 position, float scale, Material cloth, Material cap, bool steward)
+        {
+            var figure = CreateGroup(name, parent);
+            figure.localPosition = position;
+            figure.localScale = Vector3.one * scale;
+            AddMarker(figure.gameObject, UnderstoryEditabilityClass.StoryGuide, steward ? "Visible hero Steward miniature used by the runtime pathing." : "Visible worker miniature for the summit workyard.", steward);
+
+            CreatePrimitive(PrimitiveType.Capsule, name + "_Body", figure, new Vector3(0f, 0.36f, 0f), new Vector3(0.18f, 0.32f, 0.18f), cloth, UnderstoryEditabilityClass.StoryGuide, "Rounded cloth body for a real-material miniature crew read.", false);
+            CreatePrimitive(PrimitiveType.Sphere, name + "_Head", figure, new Vector3(0f, 0.86f, -0.02f), new Vector3(0.18f, 0.17f, 0.18f), Materials["warm_plaster"], UnderstoryEditabilityClass.StoryGuide, "Warm face/head mass for a readable crew silhouette.", false);
+            CreatePrimitive(PrimitiveType.Cube, name + "_BrickCap", figure, new Vector3(0f, 1.02f, -0.02f), new Vector3(0.36f, 0.1f, 0.28f), cap, UnderstoryEditabilityClass.StoryGuide, "Brick/tile helmet cap matching the miniature material language.", false);
+            CreatePrimitive(PrimitiveType.Cube, name + "_Scarf", figure, new Vector3(0f, 0.68f, -0.16f), new Vector3(0.34f, 0.07f, 0.08f), Materials["worker_cloth"], UnderstoryEditabilityClass.StoryGuide, "Tiny fabric scarf for tactile material variation.", false);
+            CreatePrimitive(PrimitiveType.Sphere, name + "_Headlamp", figure, new Vector3(0f, 1.03f, -0.19f), Vector3.one * 0.065f, Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Warm headlamp point matching the reference character language.", false);
+        }
+
+        private static void CreateHeroScatter(Transform hero)
+        {
+            var scatter = CreateGroup("KayKitHero_SurfaceMaterialScatter", hero);
+            scatter.localPosition = Vector3.zero;
+
+            CreateGrassTufts(scatter, "KayKitHero_Grass_HouseEdge", new Vector3(-0.9f, 0.24f, 1.42f), 18, 2.6f, 0.72f);
+            CreateGrassTufts(scatter, "KayKitHero_Grass_HatchEdge", new Vector3(2.14f, 0.24f, -0.25f), 14, 1.8f, 1.15f);
+            CreateGrassTufts(scatter, "KayKitHero_Grass_GardenEdge", new Vector3(-2.58f, 0.22f, -1.32f), 12, 1.6f, 0.9f);
+
+            var seed = StableSeed("kaykit_hero_scatter");
+            for (var i = 0; i < 26; i++)
+            {
+                var x = -3.7f + Hash01(seed, i, 1) * 7.25f;
+                var z = -2.35f + Hash01(seed, i, 2) * 4.9f;
+                if (Mathf.Abs(x + 0.8f) < 0.8f && Mathf.Abs(z - 0.2f) < 0.9f)
+                    continue;
+                var scale = 0.055f + Hash01(seed, i, 3) * 0.08f;
+                var material = Hash01(seed, i, 4) > 0.52f ? Materials["rough_stone"] : Materials["clay_cut"];
+                CreateRotatedPrimitive(PrimitiveType.Cube, $"KayKitHero_Pebble_{i:00}", scatter, new Vector3(x, 0.22f, z), new Vector3(scale * 1.4f, scale * 0.55f, scale), Quaternion.Euler(0f, Hash01(seed, i, 5) * 180f, Hash01(seed, i, 6) * 9f), material, UnderstoryEditabilityClass.ExtractionVolume, "Small loose material pebble for tactile miniature scale.", false);
+            }
         }
 
         private static void BuildBoreRoom(Transform root)
@@ -753,26 +956,38 @@ namespace Understory.Editor
             CreatePrimitive(PrimitiveType.Cylinder, "A_ProtectedShell_MainBoreShaft", bore, new Vector3(0f, -4.2f, 0f), new Vector3(3.2f, 7.5f, 3.2f), Materials["bore_dark"], UnderstoryEditabilityClass.ProtectedShell, "Main Bore shaft drops beyond view. Protected shell.", true);
             CreateRing("B_ProtectedLandmark_ProtectedShaftRim", bore, new Vector3(0f, 0.35f, 0f), 4.1f, 0.34f, Materials["blackglass"], UnderstoryEditabilityClass.ProtectedLandmark, "Protected shaft rim. Not casually editable.");
             CreateRing("B_ProtectedLandmark_BrokenGuideRings", bore, new Vector3(0f, 1.2f, 0f), 5.4f, 0.22f, Materials["line_ceramic"], UnderstoryEditabilityClass.ProtectedLandmark, "Broken guide rings / lift rail read.");
+            var brokenGuideRing = FindChild(bore, "B_ProtectedLandmark_BrokenGuideRings");
+            if (brokenGuideRing != null)
+                brokenGuideRing.gameObject.SetActive(false);
 
-            CreatePrimitive(PrimitiveType.Cube, "E_ExtractionVolume_BoreMaterialCache", bore, new Vector3(-7.3f, 0.65f, 1.8f), new Vector3(3.1f, 1.15f, 2.3f), Materials["clay_cut"], UnderstoryEditabilityClass.ExtractionVolume, "First interior material cache / extraction volume.", true);
-            CreatePrimitive(PrimitiveType.Cube, "C_DestroyableRuin_EditableBoreDebris_A", bore, new Vector3(-6.1f, 1.35f, -2.1f), new Vector3(2.2f, 1.0f, 1.3f), Materials["rough_stone"], UnderstoryEditabilityClass.DestroyableRuin, "Editable debris field in Bore Room.", true);
+            var boreCacheGuide = CreatePrimitive(PrimitiveType.Cube, "E_ExtractionVolume_BoreMaterialCache", bore, new Vector3(-7.3f, 0.65f, 1.8f), new Vector3(3.1f, 1.15f, 2.3f), Materials["clay_cut"], UnderstoryEditabilityClass.ExtractionVolume, "First interior material cache / extraction volume.", true);
+            boreCacheGuide.SetActive(false);
+            var boreDebrisGuide = CreatePrimitive(PrimitiveType.Cube, "C_DestroyableRuin_EditableBoreDebris_A", bore, new Vector3(-6.1f, 1.35f, -2.1f), new Vector3(2.2f, 1.0f, 1.3f), Materials["rough_stone"], UnderstoryEditabilityClass.DestroyableRuin, "Editable debris field in Bore Room.", true);
+            boreDebrisGuide.SetActive(false);
             var traceSeam = CreatePrimitive(PrimitiveType.Cube, "TraceSeam_Glow", bore, new Vector3(-7.3f, 1.35f, 3.05f), new Vector3(2.4f, 0.08f, 0.08f), Materials["lantern_glow"], UnderstoryEditabilityClass.ExtractionVolume, "Glowing seam target for the careful trace gesture.", true);
             traceSeam.SetActive(false);
             var blastDust = CreatePrimitive(PrimitiveType.Sphere, "BlastImpact_Dust", bore, new Vector3(-6.1f, 1.75f, -2.1f), new Vector3(1.3f, 0.65f, 1.3f), Materials["clay_cut"], UnderstoryEditabilityClass.StoryGuide, "Blast feedback cloud. Visible warning, not reward.", false);
             blastDust.SetActive(false);
             var collapseBurial = CreatePrimitive(PrimitiveType.Cube, "CollapseBurial_BoreDebris", bore, new Vector3(-3.8f, 1.05f, 0.4f), new Vector3(1.7f, 0.85f, 1.6f), Materials["rough_stone"], UnderstoryEditabilityClass.DestroyableRuin, "Blast burial detour: collapse buries, never deletes.", true);
             collapseBurial.SetActive(false);
-            CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuiltGhostDraft_BoreShoring", bore, new Vector3(-4.2f, 1.6f, -1.9f), new Vector3(0.35f, 2.5f, 0.35f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Ghost shoring preview for later extraction support.", true);
+            var boreShoringGuide = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuiltGhostDraft_BoreShoring", bore, new Vector3(-4.2f, 1.6f, -1.9f), new Vector3(0.35f, 2.5f, 0.35f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Ghost shoring preview for later extraction support.", true);
+            boreShoringGuide.SetActive(false);
             var committedShoring = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_BoreShoring_Committed", bore, new Vector3(-4.2f, 1.6f, -1.9f), new Vector3(0.35f, 2.5f, 0.35f), Materials["timber_brace"], UnderstoryEditabilityClass.PlayerBuilt, "Committed shoring that gates safe extraction.", true);
             committedShoring.SetActive(false);
 
-            CreatePrimitive(PrimitiveType.Cube, "Works_MistEngine_ClearerHint_Inactive", bore, new Vector3(7.1f, 1.5f, 1.8f), new Vector3(2.2f, 2.4f, 1.2f), Materials["filterstone"], UnderstoryEditabilityClass.ProtectedLandmark, "Inactive Works / Mist Engine / Clearer hint. Practical machine, not magic.", true);
-            CreatePrimitive(PrimitiveType.Cube, "TheLines_InactiveWallConduit_A", bore, new Vector3(4.1f, 2.0f, -4.9f), new Vector3(6.4f, 0.18f, 0.28f), Materials["line_ceramic"], UnderstoryEditabilityClass.ProtectedLandmark, "The Lines: inactive conduit hint.", true);
-            CreatePrimitive(PrimitiveType.Cube, "BlackVault_SealedHint", bore, new Vector3(8.6f, 1.35f, -2.9f), new Vector3(1.4f, 1.5f, 1.0f), Materials["blackglass"], UnderstoryEditabilityClass.ProtectedLandmark, "Black Vault sealed hint. Seed only.", true);
-            CreatePrimitive(PrimitiveType.Cube, "HollowerWarningMark_OverOlderStone", bore, new Vector3(2.7f, 1.8f, -5.08f), new Vector3(1.0f, 0.75f, 0.08f), Materials["hollower_mark"], UnderstoryEditabilityClass.ProtectedLandmark, "Hollower warning mark painted over older stone.", true);
+            var worksHint = CreatePrimitive(PrimitiveType.Cube, "Works_MistEngine_ClearerHint_Inactive", bore, new Vector3(7.1f, 1.5f, 1.8f), new Vector3(2.2f, 2.4f, 1.2f), Materials["filterstone"], UnderstoryEditabilityClass.ProtectedLandmark, "Inactive Works / Mist Engine / Clearer hint. Practical machine, not magic.", true);
+            worksHint.SetActive(false);
+            var linesHint = CreatePrimitive(PrimitiveType.Cube, "TheLines_InactiveWallConduit_A", bore, new Vector3(4.1f, 2.0f, -4.9f), new Vector3(6.4f, 0.18f, 0.28f), Materials["line_ceramic"], UnderstoryEditabilityClass.ProtectedLandmark, "The Lines: inactive conduit hint.", true);
+            linesHint.SetActive(false);
+            var vaultHint = CreatePrimitive(PrimitiveType.Cube, "BlackVault_SealedHint", bore, new Vector3(8.6f, 1.35f, -2.9f), new Vector3(1.4f, 1.5f, 1.0f), Materials["blackglass"], UnderstoryEditabilityClass.ProtectedLandmark, "Black Vault sealed hint. Seed only.", true);
+            vaultHint.SetActive(false);
+            var warningMark = CreatePrimitive(PrimitiveType.Cube, "HollowerWarningMark_OverOlderStone", bore, new Vector3(2.7f, 1.8f, -5.08f), new Vector3(1.0f, 0.75f, 0.08f), Materials["hollower_mark"], UnderstoryEditabilityClass.ProtectedLandmark, "Hollower warning mark painted over older stone.", true);
+            warningMark.SetActive(false);
 
-            CreatePrimitive(PrimitiveType.Cube, "BoreRoom_BroadEditableZone_C_D_E", bore, new Vector3(-3.5f, 0.52f, 1.9f), new Vector3(8.5f, 0.07f, 5f), Materials["editable_zone"], UnderstoryEditabilityClass.StoryGuide, "Interior editable/debris/extraction area overlay.", true);
+            var boreEditableOverlay = CreatePrimitive(PrimitiveType.Cube, "BoreRoom_BroadEditableZone_C_D_E", bore, new Vector3(-3.5f, 0.52f, 1.9f), new Vector3(8.5f, 0.07f, 5f), Materials["editable_zone"], UnderstoryEditabilityClass.StoryGuide, "Interior editable/debris/extraction area overlay.", true);
+            boreEditableOverlay.SetActive(false);
             BuildBoreRoomDressings(bore);
+            BuildKayKitBoreHero(bore);
             AddLabel(bore, "Label_BoreRoom", "Bore Room: built, old, deep, practical. Protected rim + editable debris/cache.", new Vector3(0f, 5.6f, -6.6f), 0.34f);
         }
 
@@ -824,6 +1039,36 @@ namespace Understory.Editor
                 var z = -3.4f + Hash01(seed, i, 3) * 7.2f;
                 CreatePrimitive(PrimitiveType.Sphere, $"BoreDustMote_Glow_{i:00}", dress, new Vector3(x, y, z), Vector3.one * (0.055f + Hash01(seed, i, 4) * 0.075f), Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Tiny warm dust glint for chamber depth and scale.", false);
             }
+
+            dress.gameObject.SetActive(false);
+        }
+
+        private static void BuildKayKitBoreHero(Transform bore)
+        {
+            var hero = CreateGroup("KayKitHero_BoreRoom_AncientWorks", bore);
+            hero.localPosition = new Vector3(-1.1f, 0.18f, 0.65f);
+            AddMarker(hero.gameObject, UnderstoryEditabilityClass.StoryGuide, "Imported CC0 KayKit pieces dressing the Bore Room into an old practical chamber.", true);
+
+            CreateImportedModel($"{KayKitTileFolder}/square_rock_detail.fbx", "KayKit_BoreFloor_RockTile_A", hero, new Vector3(-1.45f, 0f, 0.2f), Vector3.one * 1.05f, Quaternion.Euler(0f, 0f, 0f), UnderstoryEditabilityClass.ProtectedShell, "Imported rock tile grounding the Bore Room floor.", false);
+            CreateImportedModel($"{KayKitTileFolder}/square_rock_roadA_detail.fbx", "KayKit_BoreFloor_RoadTile_B", hero, new Vector3(0.75f, 0f, 0.25f), Vector3.one * 1.0f, Quaternion.Euler(0f, 90f, 0f), UnderstoryEditabilityClass.ProtectedShell, "Imported old road tile implying built access around the shaft.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/wall_straight.fbx", "KayKit_BoreWall_StoneRun_A", hero, new Vector3(-4.4f, 0.28f, -3.7f), Vector3.one * 0.82f, Quaternion.Euler(0f, 0f, 0f), UnderstoryEditabilityClass.ProtectedShell, "Imported stone wall run in the Bore Room.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/wall_straight.fbx", "KayKit_BoreWall_StoneRun_B", hero, new Vector3(-2.0f, 0.28f, -3.7f), Vector3.one * 0.82f, Quaternion.Euler(0f, 0f, 0f), UnderstoryEditabilityClass.ProtectedShell, "Imported stone wall run in the Bore Room.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/wall_corner.fbx", "KayKit_BoreWall_StoneCorner", hero, new Vector3(4.35f, 0.28f, -3.55f), Vector3.one * 0.75f, Quaternion.Euler(0f, 90f, 0f), UnderstoryEditabilityClass.ProtectedShell, "Imported stone corner supporting the old chamber read.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/mine.fbx", "KayKit_BoreMaterialFace_MineAsset", hero, new Vector3(-5.85f, 0.22f, 1.95f), Vector3.one * 0.88f, Quaternion.Euler(0f, 132f, 0f), UnderstoryEditabilityClass.ExtractionVolume, "Imported mine asset over the first material face.", true);
+            CreateImportedModel($"{KayKitObjectFolder}/detail_rocks.fbx", "KayKit_BoreLooseRocks_A", hero, new Vector3(-3.4f, 0.14f, 2.35f), Vector3.one * 0.75f, Quaternion.Euler(0f, 24f, 0f), UnderstoryEditabilityClass.DestroyableRuin, "Imported loose rocks for editable Bore debris.", false);
+            CreateImportedModel($"{KayKitObjectFolder}/bridge_roofed.fbx", "KayKit_BoreShoring_RoofedTimber", hero, new Vector3(-4.1f, 0.22f, -1.45f), Vector3.one * 0.56f, Quaternion.Euler(0f, -36f, 0f), UnderstoryEditabilityClass.PlayerBuilt, "Imported timber piece reinforcing shoring read.", false);
+
+            var committedShoring = CreatePrimitive(PrimitiveType.Cube, "KayKit_BoreShoring_Committed_Hero", hero, new Vector3(-3.86f, 0.94f, -1.18f), new Vector3(0.18f, 1.42f, 0.18f), Materials["timber_brace"], UnderstoryEditabilityClass.PlayerBuilt, "Visible committed Bore shoring after the player sets support.", true);
+            committedShoring.transform.localRotation = Quaternion.Euler(0f, -36f, 7f);
+            committedShoring.SetActive(false);
+            var collapse = CreatePrimitive(PrimitiveType.Sphere, "KayKit_BoreCollapseBurial_Hero", hero, new Vector3(-2.4f, 0.66f, 1.9f), new Vector3(0.74f, 0.36f, 0.56f), Materials["clay_cut"], UnderstoryEditabilityClass.DestroyableRuin, "Visible blast burial pile that must be cleared after rough extraction.", true);
+            collapse.SetActive(false);
+            var seamGlow = CreatePrimitive(PrimitiveType.Cube, "KayKit_BoreTraceSeam_Hero", hero, new Vector3(-5.1f, 0.98f, 2.2f), new Vector3(1.25f, 0.05f, 0.08f), Materials["lantern_glow"], UnderstoryEditabilityClass.ExtractionVolume, "Visible hero seam for the careful trace gesture.", true);
+            seamGlow.transform.localRotation = Quaternion.Euler(0f, 18f, 0f);
+            seamGlow.SetActive(false);
+
+            CreatePrimitive(PrimitiveType.Sphere, "KayKit_BoreLantern_Hero_A", hero, new Vector3(-3.6f, 1.55f, -2.8f), Vector3.one * 0.16f, Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Warm lantern cue on imported Bore Room art.", false);
+            CreatePrimitive(PrimitiveType.Sphere, "KayKit_BoreLantern_Hero_B", hero, new Vector3(3.4f, 1.35f, -2.65f), Vector3.one * 0.14f, Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "Warm lantern cue on imported Bore Room art.", false);
         }
 
         private static void BuildLegend(Transform root)
@@ -840,33 +1085,33 @@ namespace Understory.Editor
         {
             root.gameObject.AddComponent<Scene01RuntimeController>();
 
-            AddInteractable(root, "E_ExtractionVolume_ShallowSummitCut", "surface_cut", "Shallow material cut", "Workers gather scarce material here.");
-            AddInteractable(root, "C_DestroyableRuin_HatchMineralCrust", "hatch_crust", "Hatch crust", "Clear the crust to expose the hatch.");
-            AddInteractable(root, "B_ProtectedLandmark_HiddenHatch_Current", "hatch", "Hidden hatch", "Open the hatch into the Bore Room.");
-            AddInteractable(root, "D_PlayerBuiltGhostDraft_BoreShoring", "bore_shoring", "Bore shoring", "Place shoring before extraction.");
-            AddInteractable(root, "E_ExtractionVolume_BoreMaterialCache", "trace_extract", "Trace extraction cache", "Carefully trace the material face.");
-            AddInteractable(root, "C_DestroyableRuin_EditableBoreDebris_A", "blast_extract", "Blast extraction debris", "Rough blast option for the material face.");
-            AddInteractable(root, "CollapseBurial_BoreDebris", "reexcavate_burial", "Buried return path", "Clear the blast burial; collapse buries, never deletes.");
-            AddInteractable(root, "ReturnRitualStub_HaulTable", "haul_table", "Haul table", "Return material physically to the summit.");
-            AddInteractable(root, "RefinerStub_FirstKiln", "kiln", "First kiln", "Refine raw haul into buildable material.");
-            AddInteractable(root, "CoreSample_GlassColumn", "core_sample", "Core Sample", "Add the first stratum band.");
-            AddInteractable(root, "ArchiveShelf_Phase0", "archive_shelf", "Archive shelf", "Place the first fragment as an object.");
-            AddInteractable(root, "F_RepairAnchor_ShelterWindbreak", "repair_shelter", "Shelter windbreak", "Consumes brick and timber.");
-            AddInteractable(root, "F_RepairAnchor_BrokenTerraceEdge", "repair_terrace", "Broken terrace edge", "Consumes rough stone.");
-            AddInteractable(root, "F_RepairAnchor_TinySoilBed", "repair_garden", "Tiny garden bed", "Consumes viable seedclay.");
-            AddInteractable(root, "Surface_BroadEditableZone_C_D_F", "surface_build_zone", "Surface build zone", "Place the first support block.");
-            AddInteractable(root, "D_PlayerBuilt_Block_01", "player_build_block", "Player support block", "Remove or replace the proof block.");
+            AddInteractable(root, "KayKit_Rocks_HatchScar", "surface_cut", "Shallow material cut", "Workers gather scarce material here.");
+            AddInteractable(root, "KayKit_HatchMineralCrust_Hero", "hatch_crust", "Hatch crust", "Clear the crust to expose the hatch.");
+            AddInteractable(root, "KayKit_HiddenHatch_MineMouth", "hatch", "Hidden hatch", "Open the hatch into the Bore Room.");
+            AddInteractable(root, "KayKit_BoreShoring_RoofedTimber", "bore_shoring", "Bore shoring", "Place shoring before extraction.");
+            AddInteractable(root, "KayKit_BoreMaterialFace_MineAsset", "trace_extract", "Trace extraction cache", "Carefully trace the material face.");
+            AddInteractable(root, "KayKit_BoreLooseRocks_A", "blast_extract", "Blast extraction debris", "Rough blast option for the material face.");
+            AddInteractable(root, "KayKit_BoreCollapseBurial_Hero", "reexcavate_burial", "Buried return path", "Clear the blast burial; collapse buries, never deletes.");
+            AddInteractable(root, "KayKit_ReturnTable_Hero", "haul_table", "Haul table", "Return material physically to the summit.");
+            AddInteractable(root, "KayKit_FirstKiln_Hero", "kiln", "First kiln", "Refine raw haul into buildable material.");
+            AddInteractable(root, "KayKit_CoreSample_WellLikeShafthead", "core_sample", "Core Sample", "Add the first stratum band.");
+            AddInteractable(root, "KayKit_ArchiveShelf_Hero", "archive_shelf", "Archive shelf", "Place the first fragment as an object.");
+            AddInteractable(root, "KayKit_Windbreak_WallStraight", "repair_shelter", "Shelter windbreak", "Consumes brick and timber.");
+            AddInteractable(root, "KayKit_Terrace_WallCorner", "repair_terrace", "Broken terrace edge", "Consumes rough stone.");
+            AddInteractable(root, "KayKit_FirstGarden_FarmPlot", "repair_garden", "Tiny garden bed", "Consumes viable seedclay.");
+            AddInteractable(root, "KayKit_SurfaceBuildPad_Hero", "surface_build_zone", "Surface build zone", "Place the first support block.");
+            AddInteractable(root, "KayKit_PlayerSupportBlock_Hero", "player_build_block", "Player support block", "Remove or replace the proof block.");
 
             var nodes = CreateGroup("Scene01_RuntimeNodes", root);
-            CreateNode("Scene01Node_RepairCluster", nodes, new Vector3(-5.9f, 1.2f, -4.2f));
-            CreateNode("Scene01Node_ShallowCut", nodes, new Vector3(5.5f, 1.05f, -3.25f));
-            CreateNode("Scene01Node_Hatch", nodes, new Vector3(3.8f, 1.1f, -1.95f));
+            CreateNode("Scene01Node_RepairCluster", nodes, new Vector3(-8.85f, 1.2f, -1.3f));
+            CreateNode("Scene01Node_ShallowCut", nodes, new Vector3(-3.55f, 1.05f, -0.36f));
+            CreateNode("Scene01Node_Hatch", nodes, new Vector3(-3.38f, 1.1f, -0.95f));
             CreateNode("Scene01Node_BoreInspection", nodes, new Vector3(-4.2f, -8.2f, 18.1f));
-            CreateNode("Scene01Node_HaulTable", nodes, new Vector3(1.25f, 1.32f, -7.8f));
-            CreateNode("Scene01Node_Kiln", nodes, new Vector3(4.9f, 1.62f, -6.7f));
-            CreateNode("Scene01Node_BuildZone", nodes, new Vector3(-1.1f, 1.2f, -3.7f));
-            CreateNode("Scene01Node_CoreSample", nodes, new Vector3(8.6f, 1.1f, -6.9f));
-            CreateNode("Scene01Node_ArchiveShelf", nodes, new Vector3(10.25f, 1.1f, -6.6f));
+            CreateNode("Scene01Node_HaulTable", nodes, new Vector3(-5.45f, 1.25f, -2.68f));
+            CreateNode("Scene01Node_Kiln", nodes, new Vector3(-4.05f, 1.45f, -2.74f));
+            CreateNode("Scene01Node_BuildZone", nodes, new Vector3(-5.2f, 1.15f, 3.15f));
+            CreateNode("Scene01Node_CoreSample", nodes, new Vector3(-3.92f, 1.1f, 1.62f));
+            CreateNode("Scene01Node_ArchiveShelf", nodes, new Vector3(-2.3f, 1.1f, 1.5f));
         }
 
         private static Transform CreateGroup(string name, Transform parent)
@@ -891,6 +1136,216 @@ namespace Understory.Editor
             go.GetComponent<Renderer>().sharedMaterial = material;
             AddMarker(go, editabilityClass, role, required);
             return go;
+        }
+
+        private static GameObject CreateImportedModel(string assetPath, string name, Transform parent, Vector3 position, Vector3 scale, Quaternion rotation, UnderstoryEditabilityClass editabilityClass, string role, bool required)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            if (prefab == null && File.Exists(assetPath))
+            {
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+                prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            }
+
+            if (prefab == null)
+            {
+                return CreatePrimitive(
+                    PrimitiveType.Cube,
+                    name + "_MissingAssetFallback",
+                    parent,
+                    position,
+                    scale,
+                    Materials["hollower_mark"],
+                    editabilityClass,
+                    role + " Missing imported asset: " + assetPath,
+                    required);
+            }
+
+            var instance = PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
+            if (instance == null)
+            {
+                instance = UnityEngine.Object.Instantiate(prefab, parent);
+            }
+
+            instance.name = name;
+            instance.transform.localPosition = position;
+            instance.transform.localRotation = rotation;
+            instance.transform.localScale = scale;
+            AddMarker(instance, editabilityClass, role, required);
+            BeautifyImportedRenderers(instance, assetPath, name);
+            EnsureAggregateCollider(instance);
+            return instance;
+        }
+
+        private static void BeautifyImportedRenderers(GameObject instance, string assetPath, string instanceName)
+        {
+            foreach (var renderer in instance.GetComponentsInChildren<Renderer>(true))
+            {
+                renderer.shadowCastingMode = ShadowCastingMode.On;
+                renderer.receiveShadows = true;
+
+                var sharedMaterials = renderer.sharedMaterials;
+                for (var i = 0; i < sharedMaterials.Length; i++)
+                    sharedMaterials[i] = ConvertImportedMaterial(sharedMaterials[i], assetPath, instanceName);
+                renderer.sharedMaterials = sharedMaterials;
+            }
+        }
+
+        private static Material ConvertImportedMaterial(Material source, string assetPath, string instanceName)
+        {
+            if (source == null)
+                return GuessFallbackMaterial(assetPath, instanceName);
+
+            var mapped = MapKayKitMaterial(source.name, assetPath, instanceName);
+            if (mapped != null)
+                return mapped;
+
+            var color = ExtractMaterialColor(source);
+            var key = SanitizeAssetName($"{source.name}_{ColorUtility.ToHtmlStringRGBA(color)}");
+            if (ImportedMaterialCache.TryGetValue(key, out var cached) && cached != null)
+                return cached;
+
+            var path = $"{ImportedMaterialFolder}/KayKit_{key}.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                material = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                AssetDatabase.CreateAsset(material, path);
+            }
+
+            material.name = $"KayKit_{key}";
+            material.color = color;
+            if (material.HasProperty("_BaseColor"))
+                material.SetColor("_BaseColor", color);
+            if (material.HasProperty("_Smoothness"))
+                material.SetFloat("_Smoothness", 0.18f);
+            if (material.HasProperty("_Metallic"))
+                material.SetFloat("_Metallic", 0f);
+            EditorUtility.SetDirty(material);
+            ImportedMaterialCache[key] = material;
+            return material;
+        }
+
+        private static Material MapKayKitMaterial(string sourceName, string assetPath, string instanceName)
+        {
+            var haystack = $"{sourceName} {assetPath} {instanceName}".ToLowerInvariant();
+            if (haystack.Contains("water"))
+                return Materials["water_cold"];
+            if (haystack.Contains("green"))
+                return GetImportedFlatMaterial("moss_green", new Color(0.25f, 0.34f, 0.17f));
+            if (haystack.Contains("yellow"))
+                return GetImportedFlatMaterial("muted_clay_path", new Color(0.43f, 0.27f, 0.17f));
+            if (haystack.Contains("beige") || haystack.Contains("white"))
+                return GetImportedFlatMaterial("warm_plaster", new Color(0.64f, 0.55f, 0.42f));
+            if (haystack.Contains("wood") || haystack.Contains("brown"))
+                return haystack.Contains("house")
+                    ? GetImportedFlatMaterial("fired_roof_tile", new Color(0.48f, 0.17f, 0.1f))
+                    : GetImportedFlatMaterial("weathered_timber", new Color(0.34f, 0.2f, 0.12f));
+            if (haystack.Contains("metal"))
+                return GetImportedFlatMaterial("worn_metal", new Color(0.46f, 0.43f, 0.38f), 0.42f, 0.35f);
+            if (haystack.Contains("black"))
+                return GetImportedFlatMaterial("blackglass", new Color(0.035f, 0.045f, 0.05f), 0.62f, 0.08f);
+            if (haystack.Contains("stone"))
+                return GetImportedFlatMaterial("rough_stone", new Color(0.34f, 0.32f, 0.28f));
+            return null;
+        }
+
+        private static Material GetImportedFlatMaterial(string id, Color color, float smoothness = 0.14f, float metallic = 0f)
+        {
+            var key = "flat_" + SanitizeAssetName(id);
+            if (ImportedMaterialCache.TryGetValue(key, out var cached) && cached != null)
+                return cached;
+
+            var path = $"{ImportedMaterialFolder}/KayKit_{key}.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                material = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                AssetDatabase.CreateAsset(material, path);
+            }
+
+            material.name = $"KayKit_{key}";
+            material.color = color;
+            if (material.HasProperty("_BaseColor"))
+                material.SetColor("_BaseColor", color);
+            if (material.HasProperty("_Smoothness"))
+                material.SetFloat("_Smoothness", smoothness);
+            if (material.HasProperty("_Metallic"))
+                material.SetFloat("_Metallic", metallic);
+            EditorUtility.SetDirty(material);
+            ImportedMaterialCache[key] = material;
+            return material;
+        }
+
+        private static Color ExtractMaterialColor(Material material)
+        {
+            if (material.HasProperty("_BaseColor"))
+                return material.GetColor("_BaseColor");
+            if (material.HasProperty("_Color"))
+                return material.GetColor("_Color");
+            return new Color(0.54f, 0.47f, 0.38f);
+        }
+
+        private static Material GuessFallbackMaterial(string assetPath, string instanceName)
+        {
+            var haystack = $"{assetPath} {instanceName}".ToLowerInvariant();
+            if (haystack.Contains("house") || haystack.Contains("wall"))
+                return Materials["warm_plaster"];
+            if (haystack.Contains("tree") || haystack.Contains("forest") || haystack.Contains("farm"))
+                return Materials["moss_grass"];
+            if (haystack.Contains("mine") || haystack.Contains("rock"))
+                return Materials["rough_stone"];
+            if (haystack.Contains("bridge"))
+                return Materials["timber_brace"];
+            return Materials["rough_stone"];
+        }
+
+        private static string SanitizeAssetName(string value)
+        {
+            var chars = value.ToCharArray();
+            for (var i = 0; i < chars.Length; i++)
+            {
+                if (!char.IsLetterOrDigit(chars[i]) && chars[i] != '_' && chars[i] != '-')
+                    chars[i] = '_';
+            }
+            var sanitized = new string(chars).Trim('_');
+            return sanitized.Length > 80 ? sanitized.Substring(0, 80) : sanitized;
+        }
+
+        private static void EnsureAggregateCollider(GameObject instance)
+        {
+            if (instance.GetComponentsInChildren<Collider>(true).Length > 0)
+                return;
+
+            var renderers = instance.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+                return;
+
+            var bounds = renderers[0].bounds;
+            for (var i = 1; i < renderers.Length; i++)
+                bounds.Encapsulate(renderers[i].bounds);
+
+            var localBounds = new Bounds(instance.transform.InverseTransformPoint(bounds.center), Vector3.zero);
+            foreach (var corner in GetBoundsCorners(bounds))
+                localBounds.Encapsulate(instance.transform.InverseTransformPoint(corner));
+
+            var box = instance.AddComponent<BoxCollider>();
+            box.center = localBounds.center;
+            box.size = new Vector3(Mathf.Max(0.12f, localBounds.size.x), Mathf.Max(0.12f, localBounds.size.y), Mathf.Max(0.12f, localBounds.size.z));
+        }
+
+        private static IEnumerable<Vector3> GetBoundsCorners(Bounds bounds)
+        {
+            var min = bounds.min;
+            var max = bounds.max;
+            yield return new Vector3(min.x, min.y, min.z);
+            yield return new Vector3(min.x, min.y, max.z);
+            yield return new Vector3(min.x, max.y, min.z);
+            yield return new Vector3(min.x, max.y, max.z);
+            yield return new Vector3(max.x, min.y, min.z);
+            yield return new Vector3(max.x, min.y, max.z);
+            yield return new Vector3(max.x, max.y, min.z);
+            yield return new Vector3(max.x, max.y, max.z);
         }
 
         private static GameObject CreateRotatedPrimitive(PrimitiveType type, string name, Transform parent, Vector3 position, Vector3 scale, Quaternion rotation, Material material, UnderstoryEditabilityClass editabilityClass, string role, bool required)

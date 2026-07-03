@@ -7,26 +7,33 @@ Base: `main` at `83e0df9`
 ## Result
 
 Implemented the first Unity visual proof slice for `Scene 01: Summit Hatch +
-Bore Room Proof`, then upgraded it into a real-material miniature pass aligned
-to the final v7 canon stack.
+Bore Room Proof`, then replaced the blockout-forward presentation with a CC0
+imported hero-art layer aligned to the current canon stack.
 
 The scene now reads as a playable-world setup rather than a blank test scene:
 
-- tactile procedural material textures for stone, brick, clay, wood, cloth,
-  glass, grass, snow, metal, ceramic, glow, Veil, and ghost-draft surfaces
+- imported CC0 KayKit Medieval Builder house, mine/hatch mouth, farm plot,
+  well/shafthead, bridge, walls, rocks, trees, and terrain pieces
+- muted URP material remap for imported assets so the scene reads closer to a
+  real-material miniature instead of neon source colors
+- hidden scaffold/debug overlays that were useful for verification but made the
+  camera shots read like diagrams
+- tactile procedural support materials for stone, brick, clay, wood, cloth,
+  glass, grass, metal, ceramic, glow, Veil, and ghost-draft surfaces
 - cinematic lighting, URP post-processing, HDR capture cameras, and screenshot
   export tooling
 - refreshed WebGL preview served through the existing Cloudflare tunnel
-- Summit Refuge miniature with roof tiles, plaster walls, timber beams, glass
-  catchment, moss workyard, stone path, shrubs, loose material, and crew props
-- visible Steward and workers with helmets, lamps, backpack/tool silhouettes,
-  and material-coded gear
-- damaged summit repair cluster with broad editable/buildable ground
-- shallow excavation volume leading to the hidden hatch
-- first repair anchors for shelter, terrace edge, and soil bed
-- Bore Room reveal with protected shaft shell, old masonry, material cache,
-  lanterns, inactive Works / Mist Engine hint, inactive Lines conduit, and
-  sealed Black Vault hint
+- Summit Refuge hero miniature with imported house, glass catchment, garden,
+  return table, kiln, build pad, archive shelf, Core Sample/shafthead, and
+  material scatter
+- visible small-scale Steward/worker miniatures, with the runtime Steward using
+  the visible hero figure instead of a hidden placeholder
+- visible state changes for hatch crust/glow, shoring, trace seam, blast burial,
+  haul return, refined materials, repaired shelter/terrace/garden, garden
+  sprouts, support block, Core Sample band, and Archive fragment
+- Bore Room reveal with protected shaft shell plus imported chamber floor,
+  stone walls, mine/material face, rocks, shoring, seam, collapse pile, and
+  lantern cues
 - explicit editability classes for protected shell, protected landmark,
   destroyable ruin, player-built draft, extraction volume, repair anchor, and
   story guide
@@ -41,7 +48,9 @@ The scene now reads as a playable-world setup rather than a blank test scene:
 - `UnityProject/Understory_Unity_Proof/Assets/Understory/Scripts/Scene01RuntimeController.cs`
 - `UnityProject/Understory_Unity_Proof/Assets/Understory/Scripts/UnderstoryEditabilityMarker.cs`
 - `UnityProject/Understory_Unity_Proof/Assets/Understory/Materials/Scene01_Blockout/*`
+- `UnityProject/Understory_Unity_Proof/Assets/Understory/Materials/Scene01_Blockout/Imported/*`
 - `UnityProject/Understory_Unity_Proof/Assets/Understory/Materials/Scene01_Blockout/ProceduralTextures/*`
+- `UnityProject/Understory_Unity_Proof/Assets/ThirdParty/KayKit/MedievalBuilder/*`
 - `UnityProject/Understory_Unity_Proof/Assets/Understory/Settings/Scene01_CinematicVolumeProfile.asset`
 - `UnityProject/Understory_Unity_Proof/Assets/Understory/README.md`
 - `UnityProject/Understory_Unity_Proof/ProjectSettings/GraphicsSettings.asset`
@@ -82,6 +91,15 @@ Verifier highlights:
 - `Understory project verification passed.`
 - WebGL page probe returned `HTTP/2 200`.
 - WebGL wasm probe returned `HTTP/2 200` with `content-type: application/wasm`.
+- Local browser smoke test rendered the WebGL scene and Space advanced the
+  runtime from `Damaged Summit` to `Worked Stone Found`.
+
+Known caveat:
+
+- Browser console reported repeated Unity `level0` data warnings during local
+  WebGL load, but the scene rendered and input advanced correctly. Treat this
+  as a follow-up WebGL packaging/cache hygiene item, not a blocker for the
+  Unity scene proof.
 
 ## Intentionally Untouched
 
@@ -93,6 +111,7 @@ Verifier highlights:
 
 ## Next Recommendation
 
-Merge this branch after review, then run the next slice as an asset-quality
-upgrade: replace the remaining primitive placeholders with a small bevelled
-real-material kit while preserving this exact clickable loop and verifier gate.
+Merge this branch after review, then run the next slice as a focused polish
+pass: improve the WebGL packaging warning, add a bespoke bevelled material kit
+or higher-grade character/prop assets, and preserve this exact clickable loop
+and verifier gate.
