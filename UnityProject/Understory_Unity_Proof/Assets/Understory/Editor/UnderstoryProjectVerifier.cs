@@ -85,11 +85,67 @@ namespace Understory.Editor
                 "E_ExtractionVolume_BoreMaterialCache",
                 "Works_MistEngine_ClearerHint_Inactive",
                 "TheLines_InactiveWallConduit_A",
-                "BlackVault_SealedHint"
+                "BlackVault_SealedHint",
+                "D_PlayerBuilt_BoreShoring_Committed",
+                "D_PlayerBuilt_ShelterWindbreak_Repaired",
+                "D_PlayerBuilt_TerracePatch_Repaired",
+                "D_PlayerBuilt_ViableGarden_Repaired",
+                "D_PlayerBuilt_Block_01",
+                "BuildMaterial_DressedStone",
+                "BuildMaterial_Seedclay",
+                "BuildMaterial_FiredBrick",
+                "Scene01Node_RepairCluster",
+                "Scene01Node_BoreInspection"
             })
             {
                 if (!allNames.Contains(requiredName))
                     failures.Add($"Scene01 blockout missing required object `{requiredName}`.");
+            }
+
+            var interactables = allTransforms
+                .Select(transform => transform.GetComponent<Scene01Interactable>())
+                .Where(interactable => interactable != null)
+                .ToList();
+            var interactableIds = interactables.Select(interactable => interactable.interactionId).ToHashSet();
+
+            foreach (var requiredInteraction in new[]
+            {
+                "surface_cut",
+                "hatch_crust",
+                "hatch",
+                "bore_shoring",
+                "trace_extract",
+                "blast_extract",
+                "haul_table",
+                "kiln",
+                "surface_build_zone",
+                "player_build_block",
+                "repair_shelter",
+                "repair_terrace",
+                "repair_garden"
+            })
+            {
+                if (!interactableIds.Contains(requiredInteraction))
+                    failures.Add($"Scene01 runtime missing interactable `{requiredInteraction}`.");
+            }
+
+            var runtimeController = scene.GetRootGameObjects()
+                .Select(root => root.GetComponentInChildren<Scene01RuntimeController>(true))
+                .FirstOrDefault(controller => controller != null);
+            if (runtimeController == null)
+            {
+                failures.Add("Scene01 runtime is missing Scene01RuntimeController.");
+            }
+            else
+            {
+                if (!runtimeController.RunDeterministicVerification("trace_extract", out var traceReport))
+                    failures.Add(traceReport);
+                else
+                    Debug.Log(traceReport);
+                if (!runtimeController.RunDeterministicVerification("blast_extract", out var blastReport))
+                    failures.Add(blastReport);
+                else
+                    Debug.Log(blastReport);
             }
 
             var markers = allTransforms

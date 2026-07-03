@@ -32,6 +32,7 @@ namespace Understory.Editor
             BuildSurface(root.transform);
             BuildBoreRoom(root.transform);
             BuildLegend(root.transform);
+            BuildRuntimeFlow(root.transform);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -233,15 +234,26 @@ namespace Understory.Editor
             CreatePrimitive(PrimitiveType.Cube, "F_RepairAnchor_ShelterWindbreak", cluster, new Vector3(-7.5f, 1.05f, -1.8f), new Vector3(4.5f, 1.8f, 0.55f), Materials["rough_stone"], UnderstoryEditabilityClass.RepairAnchor, "First surface repair anchor: shelter/windbreak improves after haul.", true);
             CreatePrimitive(PrimitiveType.Cube, "C_DestroyableRuin_ShelterBrokenWall_Left", cluster, new Vector3(-10.1f, 1.85f, -1.8f), new Vector3(0.55f, 1.8f, 0.7f), Materials["rough_stone"], UnderstoryEditabilityClass.DestroyableRuin, "Damaged shelter piece: removable/rebuildable ruin.", true);
             CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuiltGhostDraft_ShelterPatch", cluster, new Vector3(-5.25f, 1.9f, -1.8f), new Vector3(0.75f, 1.3f, 0.75f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Ghost draft for first repair placement.", true);
+            var shelterComplete = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_ShelterWindbreak_Repaired", cluster, new Vector3(-5.65f, 1.48f, -1.8f), new Vector3(1.55f, 1.55f, 0.65f), Materials["fired_brick"], UnderstoryEditabilityClass.PlayerBuilt, "Committed shelter/windbreak repair result.", true);
+            shelterComplete.SetActive(false);
             CreatePrimitive(PrimitiveType.Cube, "TimberBrace_Shelter_A", cluster, new Vector3(-8.8f, 2.25f, -1.35f), new Vector3(0.22f, 2.8f, 0.22f), Materials["timber_brace"], UnderstoryEditabilityClass.PlayerBuilt, "Timber brace placeholder for repair material.", false);
             CreatePrimitive(PrimitiveType.Cube, "TimberBrace_Shelter_B", cluster, new Vector3(-6.3f, 2.25f, -1.35f), new Vector3(0.22f, 2.8f, 0.22f), Materials["timber_brace"], UnderstoryEditabilityClass.PlayerBuilt, "Timber brace placeholder for repair material.", false);
 
             CreatePrimitive(PrimitiveType.Cube, "F_RepairAnchor_BrokenTerraceEdge", cluster, new Vector3(-2.2f, 0.55f, -6.4f), new Vector3(8.2f, 0.9f, 1.3f), Materials["rough_stone"], UnderstoryEditabilityClass.RepairAnchor, "Broken terrace edge repair anchor: stabilizes buildable land.", true);
             CreatePrimitive(PrimitiveType.Cube, "C_DestroyableRuin_TerraceGap_A", cluster, new Vector3(-0.2f, 0.95f, -6.4f), new Vector3(1.2f, 0.7f, 1.45f), Materials["bore_dark"], UnderstoryEditabilityClass.DestroyableRuin, "Visible wound in terrace edge before repair.", true);
             CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuiltGhostDraft_TerraceStone", cluster, new Vector3(1.1f, 1.05f, -6.4f), new Vector3(1.1f, 0.85f, 1.35f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Ghost stone patch for terrace repair.", true);
+            var terraceComplete = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_TerracePatch_Repaired", cluster, new Vector3(0.45f, 1.02f, -6.4f), new Vector3(2.25f, 0.82f, 1.35f), Materials["rough_stone"], UnderstoryEditabilityClass.PlayerBuilt, "Committed terrace edge repair result.", true);
+            terraceComplete.SetActive(false);
 
             CreatePrimitive(PrimitiveType.Cube, "F_RepairAnchor_TinySoilBed", cluster, new Vector3(-9.2f, 0.42f, -5.8f), new Vector3(3.2f, 0.26f, 2.2f), Materials["seed_soil_dead"], UnderstoryEditabilityClass.RepairAnchor, "Tiny dead soil bed: first emotional restoration target.", true);
             CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuiltGhostDraft_ViableSoilPreview", cluster, new Vector3(-9.2f, 0.58f, -5.8f), new Vector3(2.2f, 0.08f, 1.2f), Materials["seed_soil_viable"], UnderstoryEditabilityClass.PlayerBuilt, "Preview of viable soil after repair.", true);
+            var gardenComplete = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_ViableGarden_Repaired", cluster, new Vector3(-9.2f, 0.7f, -5.8f), new Vector3(2.15f, 0.16f, 1.15f), Materials["seed_soil_viable"], UnderstoryEditabilityClass.PlayerBuilt, "Committed viable garden repair result.", true);
+            gardenComplete.SetActive(false);
+            for (var i = 0; i < 5; i++)
+            {
+                var sprout = CreatePrimitive(PrimitiveType.Capsule, $"GardenSprout_{i:00}", gardenComplete.transform, new Vector3(-0.8f + i * 0.4f, 0.35f, 0f), new Vector3(0.08f, 0.22f, 0.08f), Materials["seed_soil_viable"], UnderstoryEditabilityClass.PlayerBuilt, "Tiny garden sprout repair read.", false);
+                sprout.transform.localRotation = Quaternion.Euler(0f, i * 17f, 0f);
+            }
 
             AddLabel(cluster, "Label_FirstRepairCluster", "First repair cluster: windbreak + terrace edge + tiny soil bed", new Vector3(-7.2f, 4.6f, -5.2f), 0.32f);
         }
@@ -292,8 +304,18 @@ namespace Understory.Editor
             var loop = CreateGroup("LoopStubs_HaulRefineRepair", surface);
             CreatePrimitive(PrimitiveType.Cube, "ReturnRitualStub_HaulTable", loop, new Vector3(1.3f, 0.85f, -7.8f), new Vector3(2.8f, 0.32f, 1.15f), Materials["timber_brace"], UnderstoryEditabilityClass.StoryGuide, "Return Ritual v1 placeholder: material physically returns here.", true);
             CreatePrimitive(PrimitiveType.Cube, "RefinerStub_FirstKiln", loop, new Vector3(4.9f, 0.95f, -6.7f), new Vector3(1.2f, 1.05f, 1.2f), Materials["fired_brick"], UnderstoryEditabilityClass.StoryGuide, "First kiln/refiner placeholder for later loop proof.", true);
-            CreatePrimitive(PrimitiveType.Sphere, "MaterialHaul_RoughStone", loop, new Vector3(0.7f, 1.22f, -7.75f), new Vector3(0.34f, 0.34f, 0.34f), Materials["rough_stone"], UnderstoryEditabilityClass.StoryGuide, "Physical haul item placeholder.", false);
-            CreatePrimitive(PrimitiveType.Sphere, "MaterialHaul_Clay", loop, new Vector3(1.35f, 1.22f, -7.75f), new Vector3(0.34f, 0.34f, 0.34f), Materials["clay_cut"], UnderstoryEditabilityClass.StoryGuide, "Physical haul item placeholder.", false);
+            var roughHaul = CreatePrimitive(PrimitiveType.Sphere, "MaterialHaul_RoughStone", loop, new Vector3(0.7f, 1.22f, -7.75f), new Vector3(0.34f, 0.34f, 0.34f), Materials["rough_stone"], UnderstoryEditabilityClass.StoryGuide, "Physical haul item placeholder.", false);
+            roughHaul.SetActive(false);
+            var clayHaul = CreatePrimitive(PrimitiveType.Sphere, "MaterialHaul_Clay", loop, new Vector3(1.35f, 1.22f, -7.75f), new Vector3(0.34f, 0.34f, 0.34f), Materials["clay_cut"], UnderstoryEditabilityClass.StoryGuide, "Physical haul item placeholder.", false);
+            clayHaul.SetActive(false);
+            var dressedStone = CreatePrimitive(PrimitiveType.Cube, "BuildMaterial_DressedStone", loop, new Vector3(4.15f, 1.68f, -6.2f), new Vector3(0.48f, 0.22f, 0.34f), Materials["rough_stone"], UnderstoryEditabilityClass.StoryGuide, "Refined rough stone ready for repair/build.", false);
+            dressedStone.SetActive(false);
+            var seedclay = CreatePrimitive(PrimitiveType.Sphere, "BuildMaterial_Seedclay", loop, new Vector3(4.9f, 1.7f, -6.15f), new Vector3(0.28f, 0.28f, 0.28f), Materials["seed_soil_viable"], UnderstoryEditabilityClass.StoryGuide, "Viable seedclay ready for garden repair.", false);
+            seedclay.SetActive(false);
+            var firedBrick = CreatePrimitive(PrimitiveType.Cube, "BuildMaterial_FiredBrick", loop, new Vector3(5.55f, 1.68f, -6.2f), new Vector3(0.48f, 0.22f, 0.34f), Materials["fired_brick"], UnderstoryEditabilityClass.StoryGuide, "Fired brick ready for shelter repair.", false);
+            firedBrick.SetActive(false);
+            var buildBlock = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_Block_01", loop, new Vector3(-1.1f, 0.8f, -3.7f), new Vector3(0.8f, 0.8f, 0.8f), Materials["rough_stone"], UnderstoryEditabilityClass.PlayerBuilt, "Player-built support block for free-build placement/removal proof.", true);
+            buildBlock.SetActive(false);
             AddLabel(loop, "Label_ReturnRefineStub", "Loop stubs only: haul table + kiln, no economy yet", new Vector3(3.2f, 2.8f, -7.6f), 0.24f);
         }
 
@@ -310,6 +332,8 @@ namespace Understory.Editor
             CreatePrimitive(PrimitiveType.Cube, "E_ExtractionVolume_BoreMaterialCache", bore, new Vector3(-7.3f, 0.65f, 1.8f), new Vector3(3.1f, 1.15f, 2.3f), Materials["clay_cut"], UnderstoryEditabilityClass.ExtractionVolume, "First interior material cache / extraction volume.", true);
             CreatePrimitive(PrimitiveType.Cube, "C_DestroyableRuin_EditableBoreDebris_A", bore, new Vector3(-6.1f, 1.35f, -2.1f), new Vector3(2.2f, 1.0f, 1.3f), Materials["rough_stone"], UnderstoryEditabilityClass.DestroyableRuin, "Editable debris field in Bore Room.", true);
             CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuiltGhostDraft_BoreShoring", bore, new Vector3(-4.2f, 1.6f, -1.9f), new Vector3(0.35f, 2.5f, 0.35f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Ghost shoring preview for later extraction support.", true);
+            var committedShoring = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_BoreShoring_Committed", bore, new Vector3(-4.2f, 1.6f, -1.9f), new Vector3(0.35f, 2.5f, 0.35f), Materials["timber_brace"], UnderstoryEditabilityClass.PlayerBuilt, "Committed shoring that gates safe extraction.", true);
+            committedShoring.SetActive(false);
 
             CreatePrimitive(PrimitiveType.Cube, "Works_MistEngine_ClearerHint_Inactive", bore, new Vector3(7.1f, 1.5f, 1.8f), new Vector3(2.2f, 2.4f, 1.2f), Materials["filterstone"], UnderstoryEditabilityClass.ProtectedLandmark, "Inactive Works / Mist Engine / Clearer hint. Practical machine, not magic.", true);
             CreatePrimitive(PrimitiveType.Cube, "TheLines_InactiveWallConduit_A", bore, new Vector3(4.1f, 2.0f, -4.9f), new Vector3(6.4f, 0.18f, 0.28f), Materials["line_ceramic"], UnderstoryEditabilityClass.ProtectedLandmark, "The Lines: inactive conduit hint.", true);
@@ -328,6 +352,34 @@ namespace Understory.Editor
             AddLabel(legend, "Label_Guardrail_NoOldLanguage", "Guardrail: use The Works / Clearers / Mist Engines / The Lines / Black Vaults", Vector3.zero, 0.26f);
             AddLabel(legend, "Label_EditabilityClasses", "A Protected shell | B Protected landmark | C Destroyable ruin | D Player-built | E Extraction volume | F Repair anchor", new Vector3(0f, -0.8f, 0f), 0.22f);
             AddLabel(legend, "Label_PhaseScope", "Phase 0 visual proof only: no store, combat, multiplayer, water sim, or full procedural mountain", new Vector3(0f, -1.5f, 0f), 0.22f);
+        }
+
+        private static void BuildRuntimeFlow(Transform root)
+        {
+            root.gameObject.AddComponent<Scene01RuntimeController>();
+
+            AddInteractable(root, "E_ExtractionVolume_ShallowSummitCut", "surface_cut", "Shallow material cut", "Workers gather scarce material here.");
+            AddInteractable(root, "C_DestroyableRuin_HatchMineralCrust", "hatch_crust", "Hatch crust", "Clear the crust to expose the hatch.");
+            AddInteractable(root, "B_ProtectedLandmark_HiddenHatch_Current", "hatch", "Hidden hatch", "Open the hatch into the Bore Room.");
+            AddInteractable(root, "D_PlayerBuiltGhostDraft_BoreShoring", "bore_shoring", "Bore shoring", "Place shoring before extraction.");
+            AddInteractable(root, "E_ExtractionVolume_BoreMaterialCache", "trace_extract", "Trace extraction cache", "Carefully trace the material face.");
+            AddInteractable(root, "C_DestroyableRuin_EditableBoreDebris_A", "blast_extract", "Blast extraction debris", "Rough blast option for the material face.");
+            AddInteractable(root, "ReturnRitualStub_HaulTable", "haul_table", "Haul table", "Return material physically to the summit.");
+            AddInteractable(root, "RefinerStub_FirstKiln", "kiln", "First kiln", "Refine raw haul into buildable material.");
+            AddInteractable(root, "F_RepairAnchor_ShelterWindbreak", "repair_shelter", "Shelter windbreak", "Consumes brick and timber.");
+            AddInteractable(root, "F_RepairAnchor_BrokenTerraceEdge", "repair_terrace", "Broken terrace edge", "Consumes rough stone.");
+            AddInteractable(root, "F_RepairAnchor_TinySoilBed", "repair_garden", "Tiny garden bed", "Consumes viable seedclay.");
+            AddInteractable(root, "Surface_BroadEditableZone_C_D_F", "surface_build_zone", "Surface build zone", "Place the first support block.");
+            AddInteractable(root, "D_PlayerBuilt_Block_01", "player_build_block", "Player support block", "Remove or replace the proof block.");
+
+            var nodes = CreateGroup("Scene01_RuntimeNodes", root);
+            CreateNode("Scene01Node_RepairCluster", nodes, new Vector3(-5.9f, 1.2f, -4.2f));
+            CreateNode("Scene01Node_ShallowCut", nodes, new Vector3(5.5f, 1.05f, -3.25f));
+            CreateNode("Scene01Node_Hatch", nodes, new Vector3(3.8f, 1.1f, -1.95f));
+            CreateNode("Scene01Node_BoreInspection", nodes, new Vector3(-4.2f, -8.2f, 18.1f));
+            CreateNode("Scene01Node_HaulTable", nodes, new Vector3(1.25f, 1.32f, -7.8f));
+            CreateNode("Scene01Node_Kiln", nodes, new Vector3(4.9f, 1.62f, -6.7f));
+            CreateNode("Scene01Node_BuildZone", nodes, new Vector3(-1.1f, 1.2f, -3.7f));
         }
 
         private static Transform CreateGroup(string name, Transform parent)
@@ -415,6 +467,38 @@ namespace Understory.Editor
             marker.gameplayRole = role;
             marker.sourceOfTruthNote = "SOURCE_OF_TRUTH.md + START_HERE_UNDERSTORY_HANDOFF_v7.md";
             marker.phaseZeroRequired = required;
+        }
+
+        private static void AddInteractable(Transform root, string objectName, string interactionId, string displayName, string hint)
+        {
+            var target = FindChild(root, objectName);
+            if (target == null)
+                throw new InvalidOperationException($"Cannot add Scene01 interactable. Missing object `{objectName}`.");
+
+            var interactable = target.GetComponent<Scene01Interactable>() ?? target.gameObject.AddComponent<Scene01Interactable>();
+            interactable.interactionId = interactionId;
+            interactable.displayName = displayName;
+            interactable.objectiveHint = hint;
+        }
+
+        private static void CreateNode(string name, Transform parent, Vector3 position)
+        {
+            var node = new GameObject(name);
+            node.transform.SetParent(parent);
+            node.transform.localPosition = position;
+            node.transform.localRotation = Quaternion.identity;
+            node.transform.localScale = Vector3.one;
+            AddMarker(node, UnderstoryEditabilityClass.StoryGuide, $"Soft tap-to-move runtime node: {name}.", false);
+        }
+
+        private static Transform FindChild(Transform root, string objectName)
+        {
+            foreach (var child in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name == objectName)
+                    return child;
+            }
+            return null;
         }
 
         private static void LookAt(Transform transform, Vector3 target)

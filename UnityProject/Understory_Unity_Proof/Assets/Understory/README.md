@@ -11,10 +11,10 @@ Start with:
 Scope stays tight: visual proof first, then interaction/editability, then the
 first extract / haul / refine / repair loop.
 
-## Scene 01 Visual Proof Pass 1
+## Scene 01 Working Proof
 
-The current scene contains `Scene01_VisualProofPass1`, a visual blockout for the
-first playable proof:
+The current scene contains `Scene01_VisualProofPass1`, a working first-scene
+proof:
 
 - damaged summit repair cluster with a broad editable surface zone
 - shallow summit cut revealing the hidden hatch
@@ -23,6 +23,10 @@ first playable proof:
   and sealed Black Vault hint
 - editability markers for protected shell, protected landmark, destroyable ruin,
   player-built draft, extraction volume, and repair anchor zones
+- clickable runtime flow from summit material gathering to hatch discovery,
+  Bore Room reveal, shoring, trace/blast extraction, physical haul return,
+  kiln refine, repair anchors, and build/remove proof
+- deterministic verifier coverage for both trace and blast extraction paths
 
 Regenerate the blockout with:
 
