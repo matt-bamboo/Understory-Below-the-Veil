@@ -950,7 +950,9 @@ namespace Understory
             if (Application.isBatchMode)
                 return;
 
+#if UNITY_IOS || UNITY_ANDROID
             Handheld.Vibrate();
+#endif
         }
 
         private Transform FindTransformByName(string objectName)

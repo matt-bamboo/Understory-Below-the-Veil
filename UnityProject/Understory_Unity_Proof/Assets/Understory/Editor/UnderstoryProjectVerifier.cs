@@ -35,6 +35,21 @@ namespace Understory.Editor
             if (AssetDatabase.LoadAssetAtPath<UniversalRendererData>("Assets/Understory/Settings/Understory_UniversalRenderer.asset") == null)
                 failures.Add("Missing Understory Universal Renderer asset.");
 
+            if (AssetDatabase.LoadAssetAtPath<VolumeProfile>("Assets/Understory/Settings/Scene01_CinematicVolumeProfile.asset") == null)
+                failures.Add("Missing Scene01 cinematic volume profile.");
+
+            foreach (var texturePath in new[]
+            {
+                "Assets/Understory/Materials/Scene01_Blockout/ProceduralTextures/rough_stone_Stone.asset",
+                "Assets/Understory/Materials/Scene01_Blockout/ProceduralTextures/roof_tile_Brick.asset",
+                "Assets/Understory/Materials/Scene01_Blockout/ProceduralTextures/steward_cloth_Cloth.asset",
+                "Assets/Understory/Materials/Scene01_Blockout/ProceduralTextures/glass_pane_Glass.asset"
+            })
+            {
+                if (AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath) == null)
+                    failures.Add($"Missing real-material procedural texture `{texturePath}`.");
+            }
+
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
                 failures.Add("Missing Scene01 starter scene.");
 
@@ -70,7 +85,12 @@ namespace Understory.Editor
             foreach (var requiredName in new[]
             {
                 "Scene01_VisualProofPass1",
+                "Scene01_CinematicColorVolume",
                 "Surface_BroadEditableZone_C_D_F",
+                "SummitRefuge_RealMaterialMiniature",
+                "RefugeRoof_LeftPlane",
+                "RefugeWaterCatch_Glass",
+                "Surface_TactileMaterialScatter",
                 "F_RepairAnchor_ShelterWindbreak",
                 "F_RepairAnchor_BrokenTerraceEdge",
                 "F_RepairAnchor_TinySoilBed",
@@ -78,8 +98,12 @@ namespace Understory.Editor
                 "B_ProtectedLandmark_HiddenHatch_Current",
                 "B_ProtectedLandmark_HiddenHatch_StateLine",
                 "StewardPlaceholder_SummitSteward",
+                "Steward_HighAirHelmet_BrickCap",
                 "WorkerPlaceholder_ShallowCut_A",
                 "02_BoreRoom_Blockout",
+                "BoreRoom_RealMaterialDressings",
+                "BoreFloor_AncientPaver_00",
+                "BoreLanternString_WarmPoint_00",
                 "A_ProtectedShell_MainBoreShaft",
                 "B_ProtectedLandmark_ProtectedShaftRim",
                 "E_ExtractionVolume_BoreMaterialCache",
@@ -89,6 +113,7 @@ namespace Understory.Editor
                 "Works_MistEngine_ClearerHint_Inactive",
                 "TheLines_InactiveWallConduit_A",
                 "BlackVault_SealedHint",
+                "BlackVault_SealedFrame_Top",
                 "D_PlayerBuilt_BoreShoring_Committed",
                 "CoreSample_GlassColumn",
                 "CoreSampleBand_FirstDescent",
