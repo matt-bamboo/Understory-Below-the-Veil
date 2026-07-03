@@ -6,20 +6,26 @@ Base: `main` at `83e0df9`
 
 ## Result
 
-Scene 01 is now a working Unity proof, not only a visual blockout.
+Scene 01 is now a working Unity first-playable proof, not a static visual
+blockout.
 
 Implemented the first scene loop:
 
-- workers gather scarce material at the shallow summit cut
-- the Steward clears the hidden hatch and opens the route
+- workers gather scarce material and uncover the hidden hatch
+- the Steward clears the hatch crust and opens the route into the Bore
 - camera transitions to the Bore Room
 - first shoring is placed before extraction
 - player can use trace extraction or blast extraction
-- haul returns physically through the haul table stub
+- trace requires a drag gesture; blast creates a burial detour before return
+- haul returns physically through the Return Ritual table
 - first kiln/refiner converts raw haul into usable repair/build material
+- Core Sample receives the first stratum band
+- Archive shelf receives the first seam/bulk fragment as a physical object
 - player can place, remove, and replace one support block in the surface build zone
+- committed build reveals a draft want-list for the next dig
 - player repairs the shelter/windbreak, terrace edge, and tiny garden
-- completion state confirms material from below repaired life above
+- completion state confirms the v7 first-scene loop: descend, extract, return,
+  refine, build, record, and want the next haul
 
 ## Runtime Files
 
@@ -46,7 +52,9 @@ Also passed:
 - Unity scene regeneration through `UnderstoryScene01VisualBlockoutBuilder`
 - runtime interactable presence checks
 - required object and editability marker checks
-- deprecated old-lore wording guardrail
+- v7 canon checks for The Works, Clearers, Mist Engines, The Lines, Black Vault,
+  Core Sample, Archive, and want-list proof objects
+  proof objects
 
 ## Assets
 

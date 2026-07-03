@@ -83,10 +83,19 @@ namespace Understory.Editor
                 "A_ProtectedShell_MainBoreShaft",
                 "B_ProtectedLandmark_ProtectedShaftRim",
                 "E_ExtractionVolume_BoreMaterialCache",
+                "TraceSeam_Glow",
+                "BlastImpact_Dust",
+                "CollapseBurial_BoreDebris",
                 "Works_MistEngine_ClearerHint_Inactive",
                 "TheLines_InactiveWallConduit_A",
                 "BlackVault_SealedHint",
                 "D_PlayerBuilt_BoreShoring_Committed",
+                "CoreSample_GlassColumn",
+                "CoreSampleBand_FirstDescent",
+                "ArchiveShelf_Phase0",
+                "ArchiveSingular_FirstSeam",
+                "WantList_EastWallDraft",
+                "FarGlass_BlockedByVeil",
                 "D_PlayerBuilt_ShelterWindbreak_Repaired",
                 "D_PlayerBuilt_TerracePatch_Repaired",
                 "D_PlayerBuilt_ViableGarden_Repaired",
@@ -116,8 +125,11 @@ namespace Understory.Editor
                 "bore_shoring",
                 "trace_extract",
                 "blast_extract",
+                "reexcavate_burial",
                 "haul_table",
                 "kiln",
+                "core_sample",
+                "archive_shelf",
                 "surface_build_zone",
                 "player_build_block",
                 "repair_shelter",
@@ -127,6 +139,12 @@ namespace Understory.Editor
             {
                 if (!interactableIds.Contains(requiredInteraction))
                     failures.Add($"Scene01 runtime missing interactable `{requiredInteraction}`.");
+            }
+
+            foreach (var interactable in interactables)
+            {
+                if (interactable.actionMarker == null)
+                    failures.Add($"Scene01 interactable `{interactable.interactionId}` is missing an in-world action marker.");
             }
 
             var runtimeController = scene.GetRootGameObjects()
@@ -186,7 +204,13 @@ namespace Understory.Editor
                 "Lungstone",
                 "mountain breathes",
                 "breathing mountain",
-                "world lungs"
+                "world lungs",
+                "magic bloodline",
+                "chosen one",
+                "loot box",
+                "gacha",
+                "coins",
+                "premium currency"
             };
 
             foreach (var transform in allTransforms)

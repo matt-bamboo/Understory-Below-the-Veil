@@ -8,24 +8,30 @@ Start with:
 - `Assets/Understory/Scenes/Scene01_SummitHatch_BoreRoom.unity`
 - `Assets/Understory/Settings/Understory_URP.asset`
 
-Scope stays tight: visual proof first, then interaction/editability, then the
-first extract / haul / refine / repair loop.
+Scope stays tight around the v7 first playable loop: Summit Refuge, hidden hatch,
+first descent, trace/blast extraction, Return Ritual, kiln refine, Core Sample,
+Archive shelf, ghost draft want-list, and first surface repair/build payoff.
 
 ## Scene 01 Working Proof
 
 The current scene contains `Scene01_VisualProofPass1`, a working first-scene
-proof:
+playable proof:
 
 - damaged summit repair cluster with a broad editable surface zone
-- shallow summit cut revealing the hidden hatch
-- Steward and worker placeholders to make the discovery beat readable
-- Bore Room reveal with protected shell, inactive Works/Mist Engine hints, Lines,
-  and sealed Black Vault hint
+- shallow summit cut revealing the hidden hatch into the Bore
+- Steward and worker placeholders to make the first Bore opening beat readable
+- Bore Room reveal with protected shell, inactive Works/Mist Engine hint, The
+  Lines conduit, and sealed Black Vault hint
+- Core Sample column, Phase 0 Archive shelf, Far-Glass seed, and ghost draft
+  want-list objects
 - editability markers for protected shell, protected landmark, destroyable ruin,
   player-built draft, extraction volume, and repair anchor zones
-- clickable runtime flow from summit material gathering to hatch discovery,
-  Bore Room reveal, shoring, trace/blast extraction, physical haul return,
-  kiln refine, repair anchors, and build/remove proof
+- tap/click runtime flow from summit material gathering to Bore opening,
+  Bore Room reveal, shoring, trace/blast extraction, blast burial cleanup,
+  physical Return Ritual, kiln refine, Core Sample band, Archive fragment,
+  repair anchors, and build/remove proof
+- glowing in-world action markers and a small HUD; the button-list proof path is
+  no longer the primary interaction
 - deterministic verifier coverage for both trace and blast extraction paths
 
 Regenerate the blockout with:

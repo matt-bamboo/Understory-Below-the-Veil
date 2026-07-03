@@ -26,7 +26,7 @@ namespace Understory.Editor
             scene.name = "Scene01_SummitHatch_BoreRoom";
 
             var root = new GameObject("Scene01_VisualProofPass1");
-            AddMarker(root, UnderstoryEditabilityClass.StoryGuide, "Scene 01 visual proof root. Scope: visual/blockout only.", true);
+            AddMarker(root, UnderstoryEditabilityClass.StoryGuide, "Scene 01 playable proof root. Scope: v7 first-scene loop.", true);
 
             BuildLightingAndCameras(root.transform);
             BuildSurface(root.transform);
@@ -223,8 +223,9 @@ namespace Understory.Editor
             BuildShallowCutAndHatch(surface);
             BuildCharacters(surface);
             BuildReturnAndRefineStubs(surface);
+            BuildShaftheadProgress(surface);
 
-            AddLabel(surface, "Label_SurfaceScope", "Surface proof: damaged repair cluster + shallow cut + hidden hatch discovery", new Vector3(-2f, 5.2f, -10f), 0.42f);
+            AddLabel(surface, "Label_SurfaceScope", "First playable: Summit Refuge + sealed Bore + Return Ritual + draft want-list", new Vector3(-2f, 5.2f, -10f), 0.42f);
         }
 
         private static void BuildRepairCluster(Transform surface)
@@ -260,8 +261,8 @@ namespace Understory.Editor
 
         private static void BuildShallowCutAndHatch(Transform surface)
         {
-            var cut = CreateGroup("HatchDiscovery_ShallowMaterialCut", surface);
-            CreatePrimitive(PrimitiveType.Cube, "E_ExtractionVolume_ShallowSummitCut", cut, new Vector3(5.4f, 0.2f, -1.3f), new Vector3(6.5f, 0.42f, 3.6f), Materials["clay_cut"], UnderstoryEditabilityClass.ExtractionVolume, "Workers gather scarce clay/stone here and uncover the hatch.", true);
+            var cut = CreateGroup("BoreDiscovery_ShallowMaterialCut", surface);
+            CreatePrimitive(PrimitiveType.Cube, "E_ExtractionVolume_ShallowSummitCut", cut, new Vector3(5.4f, 0.2f, -1.3f), new Vector3(6.5f, 0.42f, 3.6f), Materials["clay_cut"], UnderstoryEditabilityClass.ExtractionVolume, "Workers gather scarce clay/stone here and uncover the hidden hatch.", true);
             CreatePrimitive(PrimitiveType.Cube, "E_ExtractionVolume_RoughStonePocket", cut, new Vector3(7.2f, 0.65f, -1.2f), new Vector3(1.35f, 0.75f, 1.25f), Materials["rough_stone"], UnderstoryEditabilityClass.ExtractionVolume, "Trace/blast candidate material pocket.", true);
             CreatePrimitive(PrimitiveType.Cube, "B_ProtectedLandmark_HiddenHatch_Current", cut, new Vector3(4.2f, 0.62f, -1.1f), new Vector3(1.65f, 0.16f, 1.65f), Materials["blackglass"], UnderstoryEditabilityClass.ProtectedLandmark, "Central hatch landmark. Protected; state is authored.", true);
             CreatePrimitive(PrimitiveType.Cube, "C_DestroyableRuin_HatchMineralCrust", cut, new Vector3(4.2f, 0.78f, -1.1f), new Vector3(1.9f, 0.16f, 1.9f), Materials["filterstone"], UnderstoryEditabilityClass.DestroyableRuin, "Removable mineral crust/debris covering the hatch.", true);
@@ -282,7 +283,7 @@ namespace Understory.Editor
                     CreatePrimitive(PrimitiveType.Cube, "B_HatchState_TransitionGlow", states, new Vector3(x, 0.82f, 2.5f), new Vector3(0.7f, 0.44f, 0.7f), Materials["lantern_glow"], UnderstoryEditabilityClass.ProtectedLandmark, "Visual transition cue down into Bore Room.", true);
             }
 
-            AddLabel(cut, "Label_HatchDiscovery", "Workers uncover hatch while gathering scarce material", new Vector3(5.1f, 3.7f, 2.4f), 0.3f);
+            AddLabel(cut, "Label_HatchDiscovery", "Workers disturb the sealed Bore while gathering scarce material", new Vector3(5.1f, 3.7f, 2.4f), 0.3f);
         }
 
         private static void BuildCharacters(Transform surface)
@@ -316,7 +317,30 @@ namespace Understory.Editor
             firedBrick.SetActive(false);
             var buildBlock = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_Block_01", loop, new Vector3(-1.1f, 0.8f, -3.7f), new Vector3(0.8f, 0.8f, 0.8f), Materials["rough_stone"], UnderstoryEditabilityClass.PlayerBuilt, "Player-built support block for free-build placement/removal proof.", true);
             buildBlock.SetActive(false);
-            AddLabel(loop, "Label_ReturnRefineStub", "Loop stubs only: haul table + kiln, no economy yet", new Vector3(3.2f, 2.8f, -7.6f), 0.24f);
+            AddLabel(loop, "Label_ReturnRefineStub", "Return Ritual + kiln + first committed draft", new Vector3(3.2f, 2.8f, -7.6f), 0.24f);
+        }
+
+        private static void BuildShaftheadProgress(Transform surface)
+        {
+            var progress = CreateGroup("ShaftheadProgress_CoreSampleArchive", surface);
+
+            CreatePrimitive(PrimitiveType.Cylinder, "CoreSample_GlassColumn", progress, new Vector3(8.6f, 1.25f, -6.4f), new Vector3(0.45f, 1.8f, 0.45f), Materials["blackglass"], UnderstoryEditabilityClass.ProtectedLandmark, "Core Sample column: physical progress object at the shafthead.", true);
+            var firstBand = CreatePrimitive(PrimitiveType.Cylinder, "CoreSampleBand_FirstDescent", progress, new Vector3(8.6f, 1.05f, -6.4f), new Vector3(0.5f, 0.16f, 0.5f), Materials["clay_cut"], UnderstoryEditabilityClass.StoryGuide, "First Core Sample band from the Bore Room seam.", true);
+            firstBand.SetActive(false);
+
+            CreatePrimitive(PrimitiveType.Cube, "ArchiveShelf_Phase0", progress, new Vector3(10.4f, 0.88f, -5.7f), new Vector3(1.85f, 0.24f, 0.75f), Materials["timber_brace"], UnderstoryEditabilityClass.ProtectedLandmark, "Phase 0 Archive shelf: Singulars and fragments live as objects, not a lore dump.", true);
+            var archiveItem = CreatePrimitive(PrimitiveType.Sphere, "ArchiveSingular_FirstSeam", progress, new Vector3(10.4f, 1.22f, -5.7f), new Vector3(0.28f, 0.28f, 0.28f), Materials["lantern_glow"], UnderstoryEditabilityClass.StoryGuide, "First Archive seed from careful seam or scarred bulk fragment.", true);
+            archiveItem.SetActive(false);
+
+            var wantList = CreateGroup("WantList_EastWallDraft", progress);
+            wantList.localPosition = new Vector3(-2.8f, 1.15f, -8.35f);
+            for (var i = 0; i < 5; i++)
+                CreatePrimitive(PrimitiveType.Cube, $"WantList_GhostBlock_{i:00}", wantList, new Vector3(i * 0.62f, 0f, 0f), new Vector3(0.54f, 0.42f, 0.54f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Free draft ghost block: visible want-list pressure for the next dig.", true);
+            AddLabel(wantList, "Label_WantList", "Draft wants 40 more dressed stone", new Vector3(1.25f, 0.9f, 0f), 0.16f);
+            wantList.gameObject.SetActive(false);
+
+            CreatePrimitive(PrimitiveType.Cube, "FarGlass_BlockedByVeil", progress, new Vector3(11.7f, 1.45f, -8.1f), new Vector3(0.32f, 1.35f, 0.32f), Materials["line_ceramic"], UnderstoryEditabilityClass.ProtectedLandmark, "Far-Glass seed: visible, still blocked by the Veil in Phase 0.", true);
+            AddLabel(progress, "Label_CoreArchive", "Core Sample + Archive shelf make progress physical", new Vector3(9.7f, 3.25f, -6.6f), 0.23f);
         }
 
         private static void BuildBoreRoom(Transform root)
@@ -331,6 +355,12 @@ namespace Understory.Editor
 
             CreatePrimitive(PrimitiveType.Cube, "E_ExtractionVolume_BoreMaterialCache", bore, new Vector3(-7.3f, 0.65f, 1.8f), new Vector3(3.1f, 1.15f, 2.3f), Materials["clay_cut"], UnderstoryEditabilityClass.ExtractionVolume, "First interior material cache / extraction volume.", true);
             CreatePrimitive(PrimitiveType.Cube, "C_DestroyableRuin_EditableBoreDebris_A", bore, new Vector3(-6.1f, 1.35f, -2.1f), new Vector3(2.2f, 1.0f, 1.3f), Materials["rough_stone"], UnderstoryEditabilityClass.DestroyableRuin, "Editable debris field in Bore Room.", true);
+            var traceSeam = CreatePrimitive(PrimitiveType.Cube, "TraceSeam_Glow", bore, new Vector3(-7.3f, 1.35f, 3.05f), new Vector3(2.4f, 0.08f, 0.08f), Materials["lantern_glow"], UnderstoryEditabilityClass.ExtractionVolume, "Glowing seam target for the careful trace gesture.", true);
+            traceSeam.SetActive(false);
+            var blastDust = CreatePrimitive(PrimitiveType.Sphere, "BlastImpact_Dust", bore, new Vector3(-6.1f, 1.75f, -2.1f), new Vector3(1.3f, 0.65f, 1.3f), Materials["clay_cut"], UnderstoryEditabilityClass.StoryGuide, "Blast feedback cloud. Visible warning, not reward.", false);
+            blastDust.SetActive(false);
+            var collapseBurial = CreatePrimitive(PrimitiveType.Cube, "CollapseBurial_BoreDebris", bore, new Vector3(-3.8f, 1.05f, 0.4f), new Vector3(1.7f, 0.85f, 1.6f), Materials["rough_stone"], UnderstoryEditabilityClass.DestroyableRuin, "Blast burial detour: collapse buries, never deletes.", true);
+            collapseBurial.SetActive(false);
             CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuiltGhostDraft_BoreShoring", bore, new Vector3(-4.2f, 1.6f, -1.9f), new Vector3(0.35f, 2.5f, 0.35f), Materials["ghost_draft"], UnderstoryEditabilityClass.PlayerBuilt, "Ghost shoring preview for later extraction support.", true);
             var committedShoring = CreatePrimitive(PrimitiveType.Cube, "D_PlayerBuilt_BoreShoring_Committed", bore, new Vector3(-4.2f, 1.6f, -1.9f), new Vector3(0.35f, 2.5f, 0.35f), Materials["timber_brace"], UnderstoryEditabilityClass.PlayerBuilt, "Committed shoring that gates safe extraction.", true);
             committedShoring.SetActive(false);
@@ -349,9 +379,9 @@ namespace Understory.Editor
             var legend = CreateGroup("00_EditabilityLegend_And_Guardrails", root);
             legend.position = new Vector3(-17f, 2.4f, 7f);
 
-            AddLabel(legend, "Label_Guardrail_NoOldLanguage", "Guardrail: use The Works / Clearers / Mist Engines / The Lines / Black Vaults", Vector3.zero, 0.26f);
+            AddLabel(legend, "Label_Guardrail_CanonLanguage", "v7 canon: The Works / Clearers / Mist Engines / The Lines / Black Vaults", Vector3.zero, 0.26f);
             AddLabel(legend, "Label_EditabilityClasses", "A Protected shell | B Protected landmark | C Destroyable ruin | D Player-built | E Extraction volume | F Repair anchor", new Vector3(0f, -0.8f, 0f), 0.22f);
-            AddLabel(legend, "Label_PhaseScope", "Phase 0 visual proof only: no store, combat, multiplayer, water sim, or full procedural mountain", new Vector3(0f, -1.5f, 0f), 0.22f);
+            AddLabel(legend, "Label_PhaseScope", "Phase 0 first playable: no store, combat, multiplayer, water sim, or full procedural mountain", new Vector3(0f, -1.5f, 0f), 0.22f);
         }
 
         private static void BuildRuntimeFlow(Transform root)
@@ -364,8 +394,11 @@ namespace Understory.Editor
             AddInteractable(root, "D_PlayerBuiltGhostDraft_BoreShoring", "bore_shoring", "Bore shoring", "Place shoring before extraction.");
             AddInteractable(root, "E_ExtractionVolume_BoreMaterialCache", "trace_extract", "Trace extraction cache", "Carefully trace the material face.");
             AddInteractable(root, "C_DestroyableRuin_EditableBoreDebris_A", "blast_extract", "Blast extraction debris", "Rough blast option for the material face.");
+            AddInteractable(root, "CollapseBurial_BoreDebris", "reexcavate_burial", "Buried return path", "Clear the blast burial; collapse buries, never deletes.");
             AddInteractable(root, "ReturnRitualStub_HaulTable", "haul_table", "Haul table", "Return material physically to the summit.");
             AddInteractable(root, "RefinerStub_FirstKiln", "kiln", "First kiln", "Refine raw haul into buildable material.");
+            AddInteractable(root, "CoreSample_GlassColumn", "core_sample", "Core Sample", "Add the first stratum band.");
+            AddInteractable(root, "ArchiveShelf_Phase0", "archive_shelf", "Archive shelf", "Place the first fragment as an object.");
             AddInteractable(root, "F_RepairAnchor_ShelterWindbreak", "repair_shelter", "Shelter windbreak", "Consumes brick and timber.");
             AddInteractable(root, "F_RepairAnchor_BrokenTerraceEdge", "repair_terrace", "Broken terrace edge", "Consumes rough stone.");
             AddInteractable(root, "F_RepairAnchor_TinySoilBed", "repair_garden", "Tiny garden bed", "Consumes viable seedclay.");
@@ -380,6 +413,8 @@ namespace Understory.Editor
             CreateNode("Scene01Node_HaulTable", nodes, new Vector3(1.25f, 1.32f, -7.8f));
             CreateNode("Scene01Node_Kiln", nodes, new Vector3(4.9f, 1.62f, -6.7f));
             CreateNode("Scene01Node_BuildZone", nodes, new Vector3(-1.1f, 1.2f, -3.7f));
+            CreateNode("Scene01Node_CoreSample", nodes, new Vector3(8.6f, 1.1f, -6.9f));
+            CreateNode("Scene01Node_ArchiveShelf", nodes, new Vector3(10.25f, 1.1f, -6.6f));
         }
 
         private static Transform CreateGroup(string name, Transform parent)
@@ -479,6 +514,24 @@ namespace Understory.Editor
             interactable.interactionId = interactionId;
             interactable.displayName = displayName;
             interactable.objectiveHint = hint;
+            interactable.requiresTraceGesture = interactionId == "trace_extract";
+            interactable.actionMarker = CreateActionMarker(root, target, interactionId);
+        }
+
+        private static Transform CreateActionMarker(Transform root, Transform target, string interactionId)
+        {
+            var marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            marker.name = $"ActionMarker_{interactionId}";
+            var renderer = target.GetComponentInChildren<Renderer>();
+            var bounds = renderer != null ? renderer.bounds : new Bounds(target.position, Vector3.one);
+            marker.transform.position = bounds.center + Vector3.up * Mathf.Max(0.85f, bounds.extents.y + 0.45f);
+            marker.transform.SetParent(target, true);
+            marker.transform.localRotation = Quaternion.identity;
+            marker.transform.localScale = Vector3.one * 0.52f;
+            marker.GetComponent<Renderer>().sharedMaterial = Materials["lantern_glow"];
+            AddMarker(marker, UnderstoryEditabilityClass.StoryGuide, $"Tap marker for interaction `{interactionId}`.", false);
+            marker.SetActive(false);
+            return marker.transform;
         }
 
         private static void CreateNode(string name, Transform parent, Vector3 position)

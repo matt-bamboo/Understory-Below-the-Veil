@@ -8,5 +8,7 @@ namespace Understory
         public string displayName;
         [TextArea(1, 3)]
         public string objectiveHint;
+        public Transform actionMarker;
+        public bool requiresTraceGesture;
     }
 }
