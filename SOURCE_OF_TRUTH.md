@@ -87,6 +87,23 @@ All worker prompts and Chief routing packets must end with a timestamp including
 
 Do not use date-only timestamps.
 
+### Remote Preview Links
+
+When Matt needs to view a local preview while away from the same network, Chief
+should expose the already-running local server through a Cloudflare quick tunnel,
+not localtunnel.
+
+Required flow:
+- first verify the local preview returns `200 OK`
+- run a Cloudflare quick tunnel to the local server port
+- verify the public Cloudflare URL returns `200 OK` and serves the expected page
+- share the Cloudflare URL, not a localhost or LAN-only URL
+- say clearly that the link is temporary, public to anyone with the URL, and
+  depends on the Mac/Codex session staying awake
+
+Avoid localtunnel for Matt-facing preview links because it may ask viewers for an
+IP/password anti-abuse prompt.
+
 ### Worker Return Packets
 
 Worker final reports must be one single copyable Markdown packet.
@@ -924,4 +941,3 @@ The surface repair cluster becomes more livable.
 The player understands:
 
 **This mountain can be rebuilt because of what is below.**
-
